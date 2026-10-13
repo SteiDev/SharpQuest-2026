@@ -4,6 +4,5 @@ public enum OwnershipKind
 {
     Physical,
     Digital,
-    Subscription,
-    Other
+    Subscription
 }

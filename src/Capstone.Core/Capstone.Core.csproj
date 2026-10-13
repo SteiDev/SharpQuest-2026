@@ -3,4 +3,7 @@
   <ItemGroup>
     <ProjectReference Include="..\..\contracts\SharpQuest.Contracts\SharpQuest.Contracts.csproj" />
   </ItemGroup>
+  <ItemGroup>
+    <Folder Include="Models\Storage\" />
+  </ItemGroup>
 </Project>
