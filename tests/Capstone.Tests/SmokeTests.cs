@@ -1,5 +1,6 @@
 using Capstone.Core.Models;
 using Capstone.Core.Models.Enums;
+using SharpQuest.Contracts;
 
 namespace Capstone.Tests;
 
@@ -74,6 +75,12 @@ public class ValueAnalyzerTests
             $"Expected cost/hour between 4 and 5 for 30 / 7, got {result.Value}");
     }
 
+    [Fact]
+    public void CostPerHour_throws_when_game_is_null()
+    {
+        Assert.Throws<ArgumentNullException>(() => _analyzer.CostPerHour(null!));
+    }
+
     // --- BacklogHoursRemaining tests ---
 
     [Fact]
@@ -121,6 +128,47 @@ public class ValueAnalyzerTests
 
         Assert.NotNull(result);
         Assert.Equal(75, result!.Value);
+    }
+
+    [Fact]
+    public void BacklogHoursRemaining_throws_when_game_is_null()
+    {
+        Assert.Throws<ArgumentNullException>(() => _analyzer.BacklogHoursRemaining(null!));
+    }
+}
+
+public class GameStoreTests
+{
+    [Fact]
+    public void Add_null_item_throws_ArgumentNullException()
+    {
+        var store = new GameStore();
+        Assert.Throws<ArgumentNullException>(() => store.Add(null!));
+    }
+
+    [Fact]
+    public void Add_duplicate_id_throws_ArgumentException()
+    {
+        var store = new GameStore();
+        var game = new Game { Id = "gm-001", Title = "Duplicate Test", Developer = new Developer { Name = "Dev" } };
+        store.Add(game);
+        Assert.Throws<ArgumentException>(() => store.Add(game));
+    }
+
+    [Fact]
+    public void Indexer_out_of_range_throws_ArgumentOutOfRangeException()
+    {
+        var store = new GameStore();
+        Assert.Throws<ArgumentOutOfRangeException>(() => _ = store[0]);
+    }
+}
+
+public class RecentlyPlayedTests
+{
+    [Fact]
+    public void Constructor_throws_when_capacity_is_less_than_one()
+    {
+        Assert.Throws<ArgumentOutOfRangeException>(() => new RecentlyPlayed<string>(0));
     }
 }
 

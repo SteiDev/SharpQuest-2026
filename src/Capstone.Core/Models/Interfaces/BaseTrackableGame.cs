@@ -35,4 +35,7 @@ public abstract class BaseTrackableGame : IItem
 
     /// <summary>Genre tag (e.g. "RPG", "FPS").</summary>
     public string? Genre { get; init; }
+
+    /// <summary>Returns a human-readable description of this game entry.</summary>
+    public abstract string Describe();
 }

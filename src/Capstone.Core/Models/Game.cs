@@ -8,4 +8,6 @@ public class Game : BaseTrackableGame
 {
     public OwnershipKind OwnershipKind { get; init; } = OwnershipKind.Digital;
     public ICollection<DLC> DLCs { get; init; } = new List<DLC>();
+
+    public override string Describe() => $"[{OwnershipKind}] {Title} on {Platform}";
 }

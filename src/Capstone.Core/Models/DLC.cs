@@ -6,4 +6,6 @@ namespace Capstone.Core.Models;
 public class DLC : BaseTrackableGame
 {
     public Game PartOf { get; init; } = null!;
+
+    public override string Describe() => $"[DLC] {Title} (part of {PartOf?.Title ?? "unknown"})";
 }
