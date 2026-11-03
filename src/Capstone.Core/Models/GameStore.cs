@@ -40,7 +40,6 @@ public class GameStore : IItemStore, IEnumerable<IItem>
         return true;
     }
 
-    // Lab 05: indexer by position
     public IItem this[int index]
     {
         get
@@ -51,10 +50,8 @@ public class GameStore : IItemStore, IEnumerable<IItem>
         }
     }
 
-    // Lab 05: indexer by id
     public IItem? this[string id] => FindById(id);
 
-    // Lab 05: IEnumerable<IItem> with yield return
     public IEnumerator<IItem> GetEnumerator()
     {
         foreach (var item in _items)
@@ -63,7 +60,6 @@ public class GameStore : IItemStore, IEnumerable<IItem>
 
     IEnumerator IEnumerable.GetEnumerator() => GetEnumerator();
 
-    // Lab 05: lazy matching iterator
     public IEnumerable<IItem> Matching(string text)
     {
         foreach (var item in _items)
