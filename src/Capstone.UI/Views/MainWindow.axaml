@@ -1,14 +1,24 @@
 <Window xmlns="https://github.com/avaloniaui"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:vm="clr-namespace:Capstone.Core.ViewModels;assembly=Capstone.Core"
+        xmlns:dev="clr-namespace:Capstone.UI.DevConsole"
         x:Class="Capstone.UI.Views.MainWindow"
         x:DataType="vm:CatalogueViewModel"
         Title="Game Library"
         Width="1050" Height="640"
         MinWidth="720" MinHeight="420"
-        WindowStartupLocation="CenterScreen">
+        WindowStartupLocation="CenterScreen"
+        KeyDown="OnWindowKeyDown">
 
-  <Grid RowDefinitions="Auto,*,Auto" ColumnDefinitions="*,280">
+  <!-- Outer grid: app rows + collapsible console row -->
+  <Grid RowDefinitions="Auto,*,Auto,Auto" ColumnDefinitions="*,280">
+
+    <!-- ── Developer Console (overlay at bottom) ──────────────────────── -->
+    <dev:DevConsoleView Grid.Row="3" Grid.ColumnSpan="2"
+                        x:Name="DevConsole"
+                        Height="240"/>
+
+
 
     <!-- ── Top bar ───────────────────────────────────────────────────────── -->
     <Border Grid.Row="0" Grid.ColumnSpan="2"

@@ -1,0 +1,101 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:local="clr-namespace:Capstone.UI.DevConsole"
+             x:Class="Capstone.UI.DevConsole.DevConsoleView"
+             x:DataType="local:DevConsoleViewModel">
+
+  <!-- Slide-up overlay panel -->
+  <Border Background="#0d0d14"
+          BorderBrush="#313244"
+          BorderThickness="0,1,0,0"
+          CornerRadius="8,8,0,0">
+
+    <Grid RowDefinitions="Auto,*,Auto">
+
+      <!-- ── Title bar ──────────────────────────────────────────────────── -->
+      <Border Grid.Row="0"
+              Background="#1e1e2e"
+              Padding="10,5"
+              CornerRadius="8,8,0,0">
+        <Grid ColumnDefinitions="Auto,*,Auto">
+          <TextBlock Grid.Column="0"
+                     Text="⚙ Developer Console"
+                     FontWeight="Bold"
+                     Foreground="#cba6f7"
+                     FontFamily="Consolas,Courier New,monospace"
+                     VerticalAlignment="Center"/>
+          <TextBlock Grid.Column="1"
+                     Text="F12 or ~ to toggle"
+                     Foreground="#585b70"
+                     FontSize="11"
+                     Margin="12,0,0,0"
+                     VerticalAlignment="Center"/>
+          <Button Grid.Column="2"
+                  Content="✕"
+                  Padding="6,2"
+                  FontSize="12"
+                  Foreground="#f38ba8"
+                  Background="Transparent"
+                  BorderThickness="0"
+                  Click="OnClose"/>
+        </Grid>
+      </Border>
+
+      <!-- ── Log output ─────────────────────────────────────────────────── -->
+      <ScrollViewer Grid.Row="1"
+                    x:Name="LogScroll"
+                    HorizontalScrollBarVisibility="Auto"
+                    VerticalScrollBarVisibility="Auto"
+                    Padding="4">
+        <ItemsControl x:Name="LogItems"
+                      ItemsSource="{Binding Lines}">
+          <ItemsControl.ItemTemplate>
+            <DataTemplate x:DataType="local:ConsoleLine">
+              <TextBlock Text="{Binding Text}"
+                         FontFamily="Consolas,Courier New,monospace"
+                         FontSize="12"
+                         TextWrapping="NoWrap"
+                         Foreground="{Binding Kind, Converter={x:Static local:DevConsoleView.KindBrushConverter}}"/>
+            </DataTemplate>
+          </ItemsControl.ItemTemplate>
+        </ItemsControl>
+      </ScrollViewer>
+
+      <!-- ── Input row ──────────────────────────────────────────────────── -->
+      <Grid Grid.Row="2"
+            ColumnDefinitions="Auto,*,Auto"
+            Margin="6,4,6,6">
+        <TextBlock Grid.Column="0"
+                   Text="›"
+                   Foreground="#a6e3a1"
+                   FontFamily="Consolas,Courier New,monospace"
+                   FontSize="16"
+                   FontWeight="Bold"
+                   VerticalAlignment="Center"
+                   Margin="0,0,6,0"/>
+        <TextBox Grid.Column="1"
+                 x:Name="InputBox"
+                 Text="{Binding Input}"
+                 Background="#181825"
+                 Foreground="#cdd6f4"
+                 CaretBrush="#cba6f7"
+                 BorderBrush="#313244"
+                 BorderThickness="1"
+                 CornerRadius="4"
+                 Padding="6,4"
+                 FontFamily="Consolas,Courier New,monospace"
+                 FontSize="12"
+                 Watermark="Enter command… (↑↓ for history)"
+                 KeyDown="OnInputKeyDown"/>
+        <Button Grid.Column="2"
+                Content="Run"
+                Padding="10,4"
+                Margin="6,0,0,0"
+                FontFamily="Consolas,Courier New,monospace"
+                Click="OnRun"/>
+      </Grid>
+
+    </Grid>
+  </Border>
+</UserControl>
+
