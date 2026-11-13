@@ -1,0 +1,50 @@
+<Window xmlns="https://github.com/avaloniaui"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        x:Class="Capstone.UI.Views.IgdbSearchDialog"
+        Title="Add from IGDB"
+        Width="560" Height="460"
+        WindowStartupLocation="CenterOwner"
+        CanResize="True">
+
+  <Grid RowDefinitions="Auto,Auto,*,Auto,Auto" Margin="16">
+
+    <TextBlock Grid.Row="0" Text="Search IGDB" FontWeight="Bold" FontSize="15" Margin="0,0,0,10"/>
+
+    <!-- Search row -->
+    <Grid Grid.Row="1" ColumnDefinitions="*,Auto" Margin="0,0,0,8">
+      <TextBox  Grid.Column="0" x:Name="SearchBox" Watermark="Game title or IGDB id…" Margin="0,0,8,0"/>
+      <Button   Grid.Column="1" Content="Search" Padding="12,6" Click="OnSearch"/>
+    </Grid>
+
+    <!-- Results list -->
+    <ListBox Grid.Row="2" x:Name="ResultsList" Margin="0,0,0,8">
+      <ListBox.ItemTemplate>
+        <DataTemplate>
+          <StackPanel Orientation="Horizontal" Spacing="8">
+            <TextBlock Text="{Binding Id}"    Foreground="#6c7086" Width="52" VerticalAlignment="Center"/>
+            <TextBlock Text="{Binding Name}"  FontWeight="SemiBold" VerticalAlignment="Center"/>
+            <TextBlock Text="{Binding ReleaseYear}" Foreground="#a6e3a1" FontSize="11" VerticalAlignment="Center"/>
+            <TextBlock Text="{Binding PrimaryGenre}"  Foreground="#89b4fa" FontSize="11" VerticalAlignment="Center"/>
+          </StackPanel>
+        </DataTemplate>
+      </ListBox.ItemTemplate>
+    </ListBox>
+
+    <!-- Status / override options -->
+    <Grid Grid.Row="3" ColumnDefinitions="Auto,*,Auto,*" Margin="0,0,0,10">
+      <TextBlock Grid.Column="0" Text="Platform:" VerticalAlignment="Center" Margin="0,0,6,0"/>
+      <ComboBox  Grid.Column="1" x:Name="PlatformBox" HorizontalAlignment="Stretch" Margin="0,0,12,0"/>
+      <TextBlock Grid.Column="2" Text="Status:" VerticalAlignment="Center" Margin="0,0,6,0"/>
+      <ComboBox  Grid.Column="3" x:Name="StatusBox" HorizontalAlignment="Stretch"/>
+    </Grid>
+
+    <!-- Buttons -->
+    <Grid Grid.Row="4" ColumnDefinitions="*,Auto,Auto">
+      <TextBlock Grid.Column="0" x:Name="StatusText" VerticalAlignment="Center" Foreground="#f38ba8" TextWrapping="Wrap"/>
+      <Button Grid.Column="1" Content="Cancel" Padding="12,6" Margin="0,0,8,0" Click="OnCancel"/>
+      <Button Grid.Column="2" Content="Add Selected" Padding="12,6" Click="OnAddSelected"/>
+    </Grid>
+
+  </Grid>
+</Window>
+

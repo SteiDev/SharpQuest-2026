@@ -1,0 +1,51 @@
+<Window xmlns="https://github.com/avaloniaui"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        x:Class="Capstone.UI.Views.AddGameDialog"
+        Title="Add Game Manually"
+        Width="420" Height="420"
+        WindowStartupLocation="CenterOwner"
+        CanResize="False">
+
+  <Grid RowDefinitions="*,Auto" Margin="16">
+
+    <StackPanel Grid.Row="0" Spacing="10">
+
+      <TextBlock Text="Add a game to your library" FontWeight="Bold" FontSize="15" Margin="0,0,0,6"/>
+
+      <Grid ColumnDefinitions="100,*" RowDefinitions="Auto,Auto,Auto,Auto,Auto,Auto,Auto" >
+
+        <TextBlock Grid.Row="0" Grid.Column="0" Text="Title" VerticalAlignment="Center"/>
+        <TextBox   Grid.Row="0" Grid.Column="1" x:Name="TitleBox" Watermark="e.g. Elden Ring"/>
+
+        <TextBlock Grid.Row="1" Grid.Column="0" Text="Platform" VerticalAlignment="Center" Margin="0,8,0,0"/>
+        <ComboBox  Grid.Row="1" Grid.Column="1" x:Name="PlatformBox" HorizontalAlignment="Stretch" Margin="0,8,0,0"/>
+
+        <TextBlock Grid.Row="2" Grid.Column="0" Text="Status" VerticalAlignment="Center" Margin="0,8,0,0"/>
+        <ComboBox  Grid.Row="2" Grid.Column="1" x:Name="StatusBox"   HorizontalAlignment="Stretch" Margin="0,8,0,0"/>
+
+        <TextBlock Grid.Row="3" Grid.Column="0" Text="Genre" VerticalAlignment="Center" Margin="0,8,0,0"/>
+        <TextBox   Grid.Row="3" Grid.Column="1" x:Name="GenreBox"    Watermark="e.g. RPG" Margin="0,8,0,0"/>
+
+        <TextBlock Grid.Row="4" Grid.Column="0" Text="Developer" VerticalAlignment="Center" Margin="0,8,0,0"/>
+        <TextBox   Grid.Row="4" Grid.Column="1" x:Name="DevBox"      Watermark="Studio name" Margin="0,8,0,0"/>
+
+        <TextBlock Grid.Row="5" Grid.Column="0" Text="Price (£)" VerticalAlignment="Center" Margin="0,8,0,0"/>
+        <TextBox   Grid.Row="5" Grid.Column="1" x:Name="PriceBox"    Watermark="e.g. 29.99" Margin="0,8,0,0"/>
+
+        <TextBlock Grid.Row="6" Grid.Column="0" Text="Year" VerticalAlignment="Center" Margin="0,8,0,0"/>
+        <TextBox   Grid.Row="6" Grid.Column="1" x:Name="YearBox"     Watermark="e.g. 2024" Margin="0,8,0,0"/>
+
+      </Grid>
+
+      <TextBlock x:Name="ErrorText" Foreground="#f38ba8" TextWrapping="Wrap" IsVisible="False"/>
+
+    </StackPanel>
+
+    <Grid Grid.Row="1" ColumnDefinitions="*,Auto,Auto" Margin="0,12,0,0">
+      <Button Grid.Column="1" Content="Cancel" Padding="12,6" Margin="0,0,8,0" Click="OnCancel"/>
+      <Button Grid.Column="2" Content="Add"    Padding="12,6" Click="OnAdd"/>
+    </Grid>
+
+  </Grid>
+</Window>
+

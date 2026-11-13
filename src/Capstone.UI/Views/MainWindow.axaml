@@ -1,0 +1,99 @@
+<Window xmlns="https://github.com/avaloniaui"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:vm="clr-namespace:Capstone.Core.ViewModels;assembly=Capstone.Core"
+        x:Class="Capstone.UI.Views.MainWindow"
+        x:DataType="vm:CatalogueViewModel"
+        Title="Game Library"
+        Width="1050" Height="640"
+        MinWidth="720" MinHeight="420"
+        WindowStartupLocation="CenterScreen">
+
+  <Grid RowDefinitions="Auto,*,Auto" ColumnDefinitions="*,280">
+
+    <!-- ── Top bar ───────────────────────────────────────────────────────── -->
+    <Border Grid.Row="0" Grid.ColumnSpan="2"
+            Background="#1e1e2e" Padding="12,8">
+      <Grid ColumnDefinitions="*,Auto,Auto,Auto">
+
+        <!-- Search box -->
+        <TextBox Grid.Column="0"
+                 Text="{Binding Filter}"
+                 Watermark="🔍  Search games…"
+                 Margin="0,0,8,0"
+                 CornerRadius="6"/>
+
+        <!-- Add manual button -->
+        <Button Grid.Column="1"
+                Content="＋ Add Manual"
+                Margin="0,0,6,0"
+                Padding="10,6"
+                Click="OnAddManualClick"
+                ToolTip.Tip="Add a game manually"/>
+
+        <!-- Add from IGDB button -->
+        <Button Grid.Column="2"
+                Content="🌐 Add from IGDB"
+                Margin="0,0,6,0"
+                Padding="10,6"
+                Click="OnAddIgdbClick"
+                ToolTip.Tip="Fetch a game from IGDB by id or search"/>
+
+        <!-- Remove button bound to RemoveCommand -->
+        <Button Grid.Column="3"
+                Content="🗑 Remove"
+                Padding="10,6"
+                Command="{Binding RemoveCommand}"
+                ToolTip.Tip="Delete selected game from library"/>
+      </Grid>
+    </Border>
+
+    <!-- ── Game list ──────────────────────────────────────────────────────── -->
+    <ListBox Grid.Row="1" Grid.Column="0"
+             ItemsSource="{Binding Items}"
+             SelectedItem="{Binding Selected}"
+             Margin="8,8,4,8"
+             CornerRadius="6">
+      <ListBox.ItemTemplate>
+        <DataTemplate>
+          <Grid ColumnDefinitions="*,Auto,Auto" Margin="4,2">
+            <TextBlock Grid.Column="0" Text="{Binding DisplayName}"
+                       FontWeight="SemiBold" VerticalAlignment="Center"/>
+            <TextBlock Grid.Column="1" Margin="8,0"
+                       Text="{Binding Status}"
+                       Foreground="#a6e3a1" FontSize="11"
+                       VerticalAlignment="Center"/>
+            <TextBlock Grid.Column="2"
+                       Text="{Binding Platform}"
+                       Foreground="#89b4fa" FontSize="11"
+                       VerticalAlignment="Center"/>
+          </Grid>
+        </DataTemplate>
+      </ListBox.ItemTemplate>
+    </ListBox>
+
+    <!-- ── Details panel ─────────────────────────────────────────────────── -->
+    <Border Grid.Row="1" Grid.Column="1"
+            Background="#181825"
+            Margin="4,8,8,8"
+            CornerRadius="8"
+            Padding="14">
+      <ScrollViewer>
+        <TextBlock Text="{Binding Details}"
+                   TextWrapping="Wrap"
+                   Foreground="#cdd6f4"
+                   FontSize="13"
+                   LineHeight="22"/>
+      </ScrollViewer>
+    </Border>
+
+    <!-- ── Status bar ─────────────────────────────────────────────────────── -->
+    <Border Grid.Row="2" Grid.ColumnSpan="2"
+            Background="#181825" Padding="12,4">
+      <TextBlock>
+        <Run Text="{Binding Count}"/>
+        <Run Text=" game(s) shown"/>
+      </TextBlock>
+    </Border>
+
+  </Grid>
+</Window>
