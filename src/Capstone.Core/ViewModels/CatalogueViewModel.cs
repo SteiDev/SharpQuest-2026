@@ -7,7 +7,6 @@ using Capstone.Core.Models.Enums;
 using Capstone.Core.Models.Interfaces;
 using Capstone.Core.Models.Storage;
 using SharpQuest.Contracts;
-
 namespace Capstone.Core.ViewModels;
 
 /// <summary>
@@ -76,6 +75,44 @@ public sealed class CatalogueViewModel : ICatalogueViewModel
             ApplyFilter();
             Notify(nameof(Filter));
         }
+    }
+
+    // ── Active filter sets ────────────────────────────────────────────────────
+
+    /// <summary>When non-empty, only games whose Status is in this set are shown.</summary>
+    public HashSet<GameStatus> ActiveStatuses { get; } = new();
+
+    /// <summary>When non-empty, only games whose Platform is in this set are shown.</summary>
+    public HashSet<Platform> ActivePlatforms { get; } = new();
+
+    /// <summary>True when any status/platform filter is active.</summary>
+    public bool HasActiveFilters => ActiveStatuses.Count > 0 || ActivePlatforms.Count > 0;
+
+    /// <summary>Toggles a status chip on/off and re-applies the filter.</summary>
+    public void ToggleStatus(GameStatus status)
+    {
+        if (!ActiveStatuses.Remove(status))
+            ActiveStatuses.Add(status);
+        Notify(nameof(HasActiveFilters));
+        ApplyFilter();
+    }
+
+    /// <summary>Toggles a platform chip on/off and re-applies the filter.</summary>
+    public void TogglePlatform(Platform platform)
+    {
+        if (!ActivePlatforms.Remove(platform))
+            ActivePlatforms.Add(platform);
+        Notify(nameof(HasActiveFilters));
+        ApplyFilter();
+    }
+
+    /// <summary>Clears all status and platform filters.</summary>
+    public void ClearFilters()
+    {
+        ActiveStatuses.Clear();
+        ActivePlatforms.Clear();
+        Notify(nameof(HasActiveFilters));
+        ApplyFilter();
     }
 
     private IItem? _selected;
@@ -232,9 +269,24 @@ public sealed class CatalogueViewModel : ICatalogueViewModel
 
     // ── Filter helpers ────────────────────────────────────────────────────────
 
-    private bool Matches(IItem item) =>
-        string.IsNullOrEmpty(_filter) ||
-        item.DisplayName.Contains(_filter, StringComparison.OrdinalIgnoreCase);
+    private bool Matches(IItem item)
+    {
+        // Text search
+        if (!string.IsNullOrEmpty(_filter) &&
+            !item.DisplayName.Contains(_filter, StringComparison.OrdinalIgnoreCase))
+            return false;
+
+        // Status / platform chips (only applied to trackable games)
+        if (item is BaseTrackableGame g)
+        {
+            if (ActiveStatuses.Count > 0 && !ActiveStatuses.Contains(g.Status))
+                return false;
+            if (ActivePlatforms.Count > 0 && !ActivePlatforms.Contains(g.Platform))
+                return false;
+        }
+
+        return true;
+    }
 
     private void ApplyFilter()
     {

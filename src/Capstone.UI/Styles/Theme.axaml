@@ -113,6 +113,31 @@
     <Setter Property="Background" Value="#572030"/>
   </Style>
 
+  <!-- ── Filter Chip (.chip class) — inactive toggle pill ─────────────── -->
+  <Style Selector="Button.chip">
+    <Setter Property="Background"      Value="#313244"/>
+    <Setter Property="Foreground"      Value="#a6adc8"/>
+    <Setter Property="BorderBrush"     Value="#45475a"/>
+    <Setter Property="BorderThickness" Value="1"/>
+    <Setter Property="CornerRadius"    Value="20"/>
+    <Setter Property="Padding"         Value="10,4"/>
+    <Setter Property="FontSize"        Value="12"/>
+    <Setter Property="FontWeight"      Value="Medium"/>
+  </Style>
+  <Style Selector="Button.chip:pointerover /template/ ContentPresenter">
+    <Setter Property="Background" Value="#45475a"/>
+  </Style>
+
+  <!-- ── Filter Chip active (.chip.active class) ──────────────────────── -->
+  <Style Selector="Button.chip.active">
+    <Setter Property="Background"      Value="#4b4580"/>
+    <Setter Property="Foreground"      Value="#cba6f7"/>
+    <Setter Property="BorderBrush"     Value="#cba6f7"/>
+  </Style>
+  <Style Selector="Button.chip.active:pointerover /template/ ContentPresenter">
+    <Setter Property="Background" Value="#5a518a"/>
+  </Style>
+
   <!-- ── ListBox ───────────────────────────────────────────────────────── -->
   <Style Selector="ListBox">
     <Setter Property="Background"      Value="#181825"/>

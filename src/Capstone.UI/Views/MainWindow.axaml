@@ -11,14 +11,14 @@
         WindowStartupLocation="CenterScreen"
         KeyDown="OnWindowKeyDown">
 
-  <Grid RowDefinitions="Auto,*,Auto,Auto" ColumnDefinitions="*,300">
+  <Grid RowDefinitions="Auto,Auto,*,Auto,Auto" ColumnDefinitions="*,300">
 
     <!-- ═══ TOP BAR ═══════════════════════════════════════════════════════ -->
     <Border Grid.Row="0" Grid.ColumnSpan="2"
             Background="#11111b"
             BorderBrush="#313244" BorderThickness="0,0,0,1"
             Padding="16,10">
-      <Grid ColumnDefinitions="Auto,*,Auto,Auto,Auto">
+      <Grid ColumnDefinitions="Auto,*,Auto,Auto,Auto,Auto,Auto">
 
         <!-- Brand -->
         <StackPanel Grid.Column="0" Orientation="Horizontal" Spacing="8"
@@ -37,8 +37,25 @@
                  Margin="0,0,12,0"
                  VerticalAlignment="Center"/>
 
-        <!-- Add Manual -->
+        <!-- Filter toggle -->
         <Button Grid.Column="2"
+                x:Name="FilterToggleBtn"
+                Content="⊟ Filter"
+                Padding="12,8"
+                Margin="0,0,8,0"
+                Click="OnFilterToggleClick"
+                ToolTip.Tip="Show/hide filter bar"/>
+
+        <!-- Value Analyzer -->
+        <Button Grid.Column="3"
+                Content="£ Analyze"
+                Padding="12,8"
+                Margin="0,0,8,0"
+                Click="OnAnalyzeClick"
+                ToolTip.Tip="Open the Value Analyzer"/>
+
+        <!-- Add Manual -->
+        <Button Grid.Column="4"
                 Content="+ Add Game"
                 Classes="accent"
                 Padding="14,8"
@@ -47,7 +64,7 @@
                 ToolTip.Tip="Add a game manually"/>
 
         <!-- Add from IGDB -->
-        <Button Grid.Column="3"
+        <Button Grid.Column="5"
                 Content="IGDB"
                 Padding="14,8"
                 Margin="0,0,8,0"
@@ -55,7 +72,7 @@
                 ToolTip.Tip="Fetch a game from IGDB"/>
 
         <!-- Remove -->
-        <Button Grid.Column="4"
+        <Button Grid.Column="6"
                 Content="Remove"
                 Classes="danger"
                 Padding="12,8"
@@ -64,8 +81,72 @@
       </Grid>
     </Border>
 
+    <!-- ═══ FILTER BAR ════════════════════════════════════════════════════ -->
+    <Border Grid.Row="1" Grid.ColumnSpan="2"
+            x:Name="FilterBar"
+            Background="#181825"
+            BorderBrush="#313244" BorderThickness="0,0,0,1"
+            Padding="16,10"
+            IsVisible="False">
+      <StackPanel Spacing="10">
+
+        <!-- Status chips -->
+        <StackPanel Orientation="Horizontal" Spacing="6">
+          <TextBlock Text="Status" Foreground="#6c7086" FontSize="11"
+                     VerticalAlignment="Center" Margin="0,0,6,0"/>
+          <Button x:Name="ChipBacklog"   Classes="chip" Content="Backlog"
+                  Click="OnStatusChipClick" Tag="Backlog"/>
+          <Button x:Name="ChipPlaying"   Classes="chip" Content="Playing"
+                  Click="OnStatusChipClick" Tag="Playing"/>
+          <Button x:Name="ChipCompleted" Classes="chip" Content="Completed"
+                  Click="OnStatusChipClick" Tag="Completed"/>
+          <Button x:Name="ChipAbandoned" Classes="chip" Content="Abandoned"
+                  Click="OnStatusChipClick" Tag="Abandoned"/>
+          <Button x:Name="ChipWishlist"  Classes="chip" Content="Wishlist"
+                  Click="OnStatusChipClick" Tag="Wishlist"/>
+        </StackPanel>
+
+        <!-- Platform chips -->
+        <StackPanel Orientation="Horizontal" Spacing="6">
+          <TextBlock Text="Platform" Foreground="#6c7086" FontSize="11"
+                     VerticalAlignment="Center" Margin="0,0,6,0"/>
+          <Button x:Name="ChipPC"      Classes="chip" Content="PC"
+                  Click="OnPlatformChipClick" Tag="PC"/>
+          <Button x:Name="ChipPS4"     Classes="chip" Content="PS4"
+                  Click="OnPlatformChipClick" Tag="PlayStation4"/>
+          <Button x:Name="ChipPS5"     Classes="chip" Content="PS5"
+                  Click="OnPlatformChipClick" Tag="PlayStation5"/>
+          <Button x:Name="ChipXbox"    Classes="chip" Content="Xbox One"
+                  Click="OnPlatformChipClick" Tag="XboxOne"/>
+          <Button x:Name="ChipSwitch"  Classes="chip" Content="Switch"
+                  Click="OnPlatformChipClick" Tag="NintendoSwitch"/>
+          <Button x:Name="ChipSwitch2" Classes="chip" Content="Switch 2"
+                  Click="OnPlatformChipClick" Tag="NintendoSwitch2"/>
+          <Button x:Name="ChipAndroid" Classes="chip" Content="Android"
+                  Click="OnPlatformChipClick" Tag="Android"/>
+          <Button x:Name="ChipIOS"     Classes="chip" Content="iOS"
+                  Click="OnPlatformChipClick" Tag="iOS"/>
+          <Button x:Name="ChipOther"   Classes="chip" Content="Other"
+                  Click="OnPlatformChipClick" Tag="Other"/>
+        </StackPanel>
+
+        <!-- Clear filters -->
+        <StackPanel Orientation="Horizontal" Spacing="8">
+          <Button Content="✕ Clear filters"
+                  Classes="danger"
+                  Padding="10,4"
+                  FontSize="12"
+                  Click="OnClearFiltersClick"/>
+          <TextBlock x:Name="ActiveFilterCount"
+                     Foreground="#6c7086" FontSize="11"
+                     VerticalAlignment="Center"/>
+        </StackPanel>
+
+      </StackPanel>
+    </Border>
+
     <!-- ═══ GAME LIST ═════════════════════════════════════════════════════ -->
-    <ListBox Grid.Row="1" Grid.Column="0"
+    <ListBox Grid.Row="2" Grid.Column="0"
              ItemsSource="{Binding Items}"
              SelectedItem="{Binding Selected}"
              Margin="12,12,6,12">
@@ -119,7 +200,7 @@
     </ListBox>
 
     <!-- ═══ DETAIL PANEL ══════════════════════════════════════════════════ -->
-    <Border Grid.Row="1" Grid.Column="1"
+    <Border Grid.Row="2" Grid.Column="1"
             Background="#181825"
             BorderBrush="#313244" BorderThickness="1,0,0,0"
             Margin="0,12,12,12"
@@ -281,7 +362,7 @@
     </Border>
 
     <!-- ═══ STATUS BAR ════════════════════════════════════════════════════ -->
-    <Border Grid.Row="2" Grid.ColumnSpan="2"
+    <Border Grid.Row="3" Grid.ColumnSpan="2"
             Background="#11111b"
             BorderBrush="#313244" BorderThickness="0,1,0,0"
             Padding="16,5">
@@ -299,7 +380,7 @@
     </Border>
 
     <!-- ═══ DEV CONSOLE ═══════════════════════════════════════════════════ -->
-    <dev:DevConsoleView Grid.Row="3" Grid.ColumnSpan="2"
+    <dev:DevConsoleView Grid.Row="4" Grid.ColumnSpan="2"
                         x:Name="DevConsole"
                         Height="240"/>
 

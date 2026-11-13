@@ -18,20 +18,39 @@ public partial class MainWindow : Window
 {
     private DevConsoleViewModel? _consoleVm;
 
+    // Tracks which status/platform chip buttons are currently active
+    // so we can toggle their CSS class without binding overhead.
+    private readonly Dictionary<Button, GameStatus> _statusChips   = new();
+    private readonly Dictionary<Button, Platform>   _platformChips = new();
+
     public MainWindow()
     {
         InitializeComponent();
-
-        // Wire the developer console once the DataContext is available.
         DataContextChanged += OnDataContextChanged;
+
+        // Register status chips
+        _statusChips[ChipBacklog]   = GameStatus.Backlog;
+        _statusChips[ChipPlaying]   = GameStatus.Playing;
+        _statusChips[ChipCompleted] = GameStatus.Completed;
+        _statusChips[ChipAbandoned] = GameStatus.Abandoned;
+        _statusChips[ChipWishlist]  = GameStatus.Wishlist;
+
+        // Register platform chips
+        _platformChips[ChipPC]      = Platform.PC;
+        _platformChips[ChipPS4]     = Platform.PlayStation4;
+        _platformChips[ChipPS5]     = Platform.PlayStation5;
+        _platformChips[ChipXbox]    = Platform.XboxOne;
+        _platformChips[ChipSwitch]  = Platform.NintendoSwitch;
+        _platformChips[ChipSwitch2] = Platform.NintendoSwitch2;
+        _platformChips[ChipAndroid] = Platform.Android;
+        _platformChips[ChipIOS]     = Platform.iOS;
+        _platformChips[ChipOther]   = Platform.Other;
     }
 
     private void OnDataContextChanged(object? sender, EventArgs e)
     {
         if (DataContext is CatalogueViewModel vm)
         {
-            // We need the backing IItemStore — reach it through the VM's store field via reflection
-            // so we don't have to change the Core API.
             var storeField = typeof(CatalogueViewModel)
                 .GetField("_store", System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance);
             var store = storeField?.GetValue(vm) as IItemStore;
@@ -41,7 +60,6 @@ public partial class MainWindow : Window
                 _consoleVm = new DevConsoleViewModel(store);
                 DevConsole.DataContext = _consoleVm;
 
-                // Bind console visibility to the control.
                 _consoleVm.PropertyChanged += (_, args) =>
                 {
                     if (args.PropertyName == nameof(DevConsoleViewModel.IsVisible))
@@ -65,13 +83,89 @@ public partial class MainWindow : Window
     {
         bool isToggle = e.Key == Key.F12 ||
                         (e.Key == Key.OemTilde) ||
-                        (e.Key == Key.Oem3);   // ` / ~ on most layouts
+                        (e.Key == Key.Oem3);
 
         if (isToggle)
         {
             _consoleVm?.Toggle();
             e.Handled = true;
         }
+    }
+
+    // ── Filter bar toggle ─────────────────────────────────────────────────────
+
+    private void OnFilterToggleClick(object? sender, RoutedEventArgs e)
+    {
+        FilterBar.IsVisible = !FilterBar.IsVisible;
+        FilterToggleBtn.Content = FilterBar.IsVisible ? "⊟ Filter" : "⊞ Filter";
+    }
+
+    // ── Status chip click ─────────────────────────────────────────────────────
+
+    private void OnStatusChipClick(object? sender, RoutedEventArgs e)
+    {
+        if (sender is not Button btn || Vm is null) return;
+        if (!_statusChips.TryGetValue(btn, out var status)) return;
+
+        Vm.ToggleStatus(status);
+
+        bool isActive = Vm.ActiveStatuses.Contains(status);
+        if (isActive) btn.Classes.Add("active");
+        else          btn.Classes.Remove("active");
+
+        UpdateFilterCountLabel();
+    }
+
+    // ── Platform chip click ───────────────────────────────────────────────────
+
+    private void OnPlatformChipClick(object? sender, RoutedEventArgs e)
+    {
+        if (sender is not Button btn || Vm is null) return;
+        if (!_platformChips.TryGetValue(btn, out var platform)) return;
+
+        Vm.TogglePlatform(platform);
+
+        bool isActive = Vm.ActivePlatforms.Contains(platform);
+        if (isActive) btn.Classes.Add("active");
+        else          btn.Classes.Remove("active");
+
+        UpdateFilterCountLabel();
+    }
+
+    // ── Clear filters ─────────────────────────────────────────────────────────
+
+    private void OnClearFiltersClick(object? sender, RoutedEventArgs e)
+    {
+        Vm?.ClearFilters();
+
+        foreach (var btn in _statusChips.Keys)   btn.Classes.Remove("active");
+        foreach (var btn in _platformChips.Keys) btn.Classes.Remove("active");
+
+        UpdateFilterCountLabel();
+    }
+
+    private void UpdateFilterCountLabel()
+    {
+        if (Vm is null) return;
+        int total = Vm.ActiveStatuses.Count + Vm.ActivePlatforms.Count;
+        ActiveFilterCount.Text = total > 0
+            ? $"{total} filter{(total == 1 ? "" : "s")} active  ·  {Vm.Count} result{(Vm.Count == 1 ? "" : "s")}"
+            : string.Empty;
+    }
+
+    // ── Value Analyzer ────────────────────────────────────────────────────────
+
+    private async void OnAnalyzeClick(object? sender, RoutedEventArgs e)
+    {
+        if (Vm is null) return;
+
+        var storeField = typeof(CatalogueViewModel)
+            .GetField("_store", System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance);
+        var store = storeField?.GetValue(Vm) as IItemStore;
+        if (store is null) return;
+
+        var dialog = new ValueAnalyzerDialog(store);
+        await dialog.ShowDialog(this);
     }
 
     // ── Add Manual ────────────────────────────────────────────────────────────
@@ -98,14 +192,12 @@ public partial class MainWindow : Window
 
     private async void OnEditClick(object? sender, RoutedEventArgs e)
     {
-        // The DataContext of the clicked MenuItem's parent ListBoxItem is the IItem.
         if (sender is not MenuItem mi) return;
         var item = (mi.Parent as ContextMenu)?.DataContext
                    ?? (mi.DataContext);
 
         if (item is not BaseTrackableGame game) return;
 
-        // Select it in the list too, so the detail panel updates immediately.
         if (Vm is not null)
             Vm.Selected = game;
 
@@ -139,11 +231,11 @@ public sealed class StatusDotConverter : IValueConverter
 
     private static string StatusToHex(GameStatus s) => s switch
     {
-        GameStatus.Playing   => "#a6e3a1",   // green  — active
-        GameStatus.Completed => "#89b4fa",   // blue   — done
-        GameStatus.Backlog   => "#f9e2af",   // yellow — waiting
-        GameStatus.Wishlist  => "#cba6f7",   // mauve  — want
-        GameStatus.Abandoned => "#f38ba8",   // red    — dropped
+        GameStatus.Playing   => "#a6e3a1",
+        GameStatus.Completed => "#89b4fa",
+        GameStatus.Backlog   => "#f9e2af",
+        GameStatus.Wishlist  => "#cba6f7",
+        GameStatus.Abandoned => "#f38ba8",
         _                    => "#585b70"
     };
 }
