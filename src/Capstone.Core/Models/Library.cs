@@ -4,7 +4,6 @@ namespace Capstone.Core.Models;
 
 /// <summary>
 /// The player's personal game library — a collection of all owned games.
-/// Session 5 will grow this into a custom indexed collection.
 /// </summary>
 public class Library
 {
