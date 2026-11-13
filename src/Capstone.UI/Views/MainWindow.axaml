@@ -107,6 +107,15 @@
           </Grid>
         </DataTemplate>
       </ListBox.ItemTemplate>
+      <ListBox.ItemContainerTheme>
+        <ControlTheme TargetType="ListBoxItem" BasedOn="{StaticResource {x:Type ListBoxItem}}">
+          <Setter Property="ContextMenu">
+            <ContextMenu>
+              <MenuItem Header="✎  Edit game…" Click="OnEditClick"/>
+            </ContextMenu>
+          </Setter>
+        </ControlTheme>
+      </ListBox.ItemContainerTheme>
     </ListBox>
 
     <!-- ═══ DETAIL PANEL ══════════════════════════════════════════════════ -->

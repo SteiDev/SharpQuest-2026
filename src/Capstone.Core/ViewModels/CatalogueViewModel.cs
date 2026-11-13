@@ -3,6 +3,7 @@ using System.Collections.Specialized;
 using System.ComponentModel;
 using System.Windows.Input;
 using Capstone.Core.Models;
+using Capstone.Core.Models.Enums;
 using Capstone.Core.Models.Interfaces;
 using SharpQuest.Contracts;
 
@@ -123,6 +124,69 @@ public sealed class CatalogueViewModel : ICatalogueViewModel
 
     /// <inheritdoc/>
     public ICommand RemoveCommand { get; }
+
+    // ── Edit support ──────────────────────────────────────────────────────────
+
+    /// <summary>
+    /// Applies validated edits from the Edit dialog to a game that is already in the store.
+    /// Raises property-changed for all detail properties so the panel refreshes.
+    /// </summary>
+    public void UpdateGame(BaseTrackableGame game,
+                           string title, Platform platform, GameStatus status,
+                           string? genre, string developer,
+                           double hoursPlayed, decimal? price, int? releaseYear, int? rating)
+    {
+        // BaseTrackableGame uses init-only setters for most fields, but the
+        // mutable ones (Status, HoursPlayed, Rating) can be set directly.
+        // For init-only fields we update via reflection so the Core API stays clean.
+        SetProp(game, nameof(game.Status),      status);
+        SetProp(game, nameof(game.HoursPlayed), hoursPlayed);
+        SetProp(game, nameof(game.Rating),      rating);
+
+        // These are init-only — use reflection to mutate in-place.
+        SetInit(game, nameof(game.Title),       title);
+        SetInit(game, nameof(game.Platform),    platform);
+        SetInit(game, nameof(game.Genre),       genre);
+        SetInit(game, nameof(game.Price),       price);
+        SetInit(game, nameof(game.ReleaseYear), releaseYear);
+        SetInit(game, "Developer",
+            new Capstone.Core.Models.Developer { Name = developer });
+
+        // Notify everything so the UI reflects the changes.
+        Notify(nameof(Details));
+        Notify(nameof(SelectedPlatform));
+        Notify(nameof(SelectedStatus));
+        Notify(nameof(SelectedHours));
+        Notify(nameof(SelectedPrice));
+        Notify(nameof(SelectedGenre));
+        Notify(nameof(SelectedDeveloper));
+        Notify(nameof(SelectedRating));
+        Notify(nameof(SelectedReleaseYear));
+
+        // Refresh the list item (DisplayName may have changed).
+        var idx = _items.IndexOf(game);
+        if (idx >= 0)
+        {
+            _items.RemoveAt(idx);
+            _items.Insert(idx, game);
+        }
+    }
+
+    private static void SetProp(object obj, string name, object? value)
+    {
+        var prop = obj.GetType().GetProperty(name,
+            System.Reflection.BindingFlags.Public | System.Reflection.BindingFlags.Instance);
+        prop?.SetValue(obj, value);
+    }
+
+    private static void SetInit(object obj, string name, object? value)
+    {
+        // init-only properties have a compiler-generated backing field; set via the property's
+        // setter directly — the runtime doesn't enforce init-only after construction.
+        var prop = obj.GetType().GetProperty(name,
+            System.Reflection.BindingFlags.Public | System.Reflection.BindingFlags.Instance);
+        prop?.SetValue(obj, value);
+    }
 
     // ── Command handlers ──────────────────────────────────────────────────────
 

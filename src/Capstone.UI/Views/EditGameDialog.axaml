@@ -1,0 +1,133 @@
+<Window xmlns="https://github.com/avaloniaui"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        x:Class="Capstone.UI.Views.EditGameDialog"
+        Title="Edit Game"
+        Width="440" Height="520"
+        WindowStartupLocation="CenterOwner"
+        CanResize="False"
+        Background="#1e1e2e">
+
+  <Grid RowDefinitions="Auto,*,Auto">
+
+    <!-- ── Header ──────────────────────────────────────────────────────── -->
+    <Border Grid.Row="0"
+            Background="#11111b"
+            BorderBrush="#313244" BorderThickness="0,0,0,1"
+            Padding="20,14">
+      <StackPanel Orientation="Horizontal" Spacing="10">
+        <Border Background="#89b4fa" CornerRadius="6"
+                Width="30" Height="30" VerticalAlignment="Center">
+          <TextBlock Text="✎" FontSize="16" FontWeight="Bold"
+                     Foreground="#1e1e2e"
+                     HorizontalAlignment="Center"
+                     VerticalAlignment="Center"/>
+        </Border>
+        <StackPanel Spacing="2">
+          <TextBlock x:Name="HeaderTitle" FontSize="15" FontWeight="Bold" Foreground="#cdd6f4"/>
+          <TextBlock Text="Edit game details" FontSize="11" Foreground="#585b70"/>
+        </StackPanel>
+      </StackPanel>
+    </Border>
+
+    <!-- ── Form ────────────────────────────────────────────────────────── -->
+    <ScrollViewer Grid.Row="1" Padding="20,16">
+      <StackPanel Spacing="12">
+
+        <!-- Title -->
+        <StackPanel Spacing="4">
+          <TextBlock Text="TITLE" FontSize="10" FontWeight="Bold"
+                     Foreground="#585b70" LetterSpacing="1"/>
+          <TextBox x:Name="TitleBox" Watermark="e.g. Elden Ring"/>
+        </StackPanel>
+
+        <!-- Platform + Status side by side -->
+        <Grid ColumnDefinitions="*,12,*">
+          <StackPanel Grid.Column="0" Spacing="4">
+            <TextBlock Text="PLATFORM" FontSize="10" FontWeight="Bold"
+                       Foreground="#585b70" LetterSpacing="1"/>
+            <ComboBox x:Name="PlatformBox" HorizontalAlignment="Stretch"/>
+          </StackPanel>
+          <StackPanel Grid.Column="2" Spacing="4">
+            <TextBlock Text="STATUS" FontSize="10" FontWeight="Bold"
+                       Foreground="#585b70" LetterSpacing="1"/>
+            <ComboBox x:Name="StatusBox" HorizontalAlignment="Stretch"/>
+          </StackPanel>
+        </Grid>
+
+        <!-- Genre -->
+        <StackPanel Spacing="4">
+          <TextBlock Text="GENRE" FontSize="10" FontWeight="Bold"
+                     Foreground="#585b70" LetterSpacing="1"/>
+          <TextBox x:Name="GenreBox" Watermark="e.g. RPG, FPS, Strategy…"/>
+        </StackPanel>
+
+        <!-- Developer -->
+        <StackPanel Spacing="4">
+          <TextBlock Text="DEVELOPER" FontSize="10" FontWeight="Bold"
+                     Foreground="#585b70" LetterSpacing="1"/>
+          <TextBox x:Name="DevBox" Watermark="Studio name"/>
+        </StackPanel>
+
+        <!-- Hours Played + Rating side by side -->
+        <Grid ColumnDefinitions="*,12,*">
+          <StackPanel Grid.Column="0" Spacing="4">
+            <TextBlock Text="HOURS PLAYED" FontSize="10" FontWeight="Bold"
+                       Foreground="#585b70" LetterSpacing="1"/>
+            <TextBox x:Name="HoursBox" Watermark="0"/>
+          </StackPanel>
+          <StackPanel Grid.Column="2" Spacing="4">
+            <TextBlock Text="RATING (1–10)" FontSize="10" FontWeight="Bold"
+                       Foreground="#585b70" LetterSpacing="1"/>
+            <TextBox x:Name="RatingBox" Watermark="optional"/>
+          </StackPanel>
+        </Grid>
+
+        <!-- Price + Year side by side -->
+        <Grid ColumnDefinitions="*,12,*">
+          <StackPanel Grid.Column="0" Spacing="4">
+            <TextBlock Text="PRICE (£)" FontSize="10" FontWeight="Bold"
+                       Foreground="#585b70" LetterSpacing="1"/>
+            <TextBox x:Name="PriceBox" Watermark="29.99"/>
+          </StackPanel>
+          <StackPanel Grid.Column="2" Spacing="4">
+            <TextBlock Text="YEAR" FontSize="10" FontWeight="Bold"
+                       Foreground="#585b70" LetterSpacing="1"/>
+            <TextBox x:Name="YearBox" Watermark="2024"/>
+          </StackPanel>
+        </Grid>
+
+        <!-- Error -->
+        <Border Background="#2d1520" CornerRadius="6" Padding="10,7"
+                IsVisible="{Binding #ErrorText.IsVisible}">
+          <TextBlock x:Name="ErrorText"
+                     Foreground="#f38ba8"
+                     TextWrapping="Wrap"
+                     FontSize="12"
+                     IsVisible="False"/>
+        </Border>
+
+      </StackPanel>
+    </ScrollViewer>
+
+    <!-- ── Footer buttons ──────────────────────────────────────────────── -->
+    <Border Grid.Row="2"
+            Background="#11111b"
+            BorderBrush="#313244" BorderThickness="0,1,0,0"
+            Padding="20,12">
+      <Grid ColumnDefinitions="*,Auto,Auto">
+        <Button Grid.Column="1"
+                Content="Cancel"
+                Padding="16,8"
+                Margin="0,0,8,0"
+                Click="OnCancel"/>
+        <Button Grid.Column="2"
+                Content="Save Changes"
+                Classes="accent"
+                Padding="16,8"
+                Click="OnSave"/>
+      </Grid>
+    </Border>
+
+  </Grid>
+</Window>
+

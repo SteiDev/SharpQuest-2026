@@ -93,6 +93,31 @@ public partial class MainWindow : Window
         if (result is not null)
             Vm?.AddCommand.Execute(result);
     }
+
+    // ── Edit game (right-click context menu) ──────────────────────────────────
+
+    private async void OnEditClick(object? sender, RoutedEventArgs e)
+    {
+        // The DataContext of the clicked MenuItem's parent ListBoxItem is the IItem.
+        if (sender is not MenuItem mi) return;
+        var item = (mi.Parent as ContextMenu)?.DataContext
+                   ?? (mi.DataContext);
+
+        if (item is not BaseTrackableGame game) return;
+
+        // Select it in the list too, so the detail panel updates immediately.
+        if (Vm is not null)
+            Vm.Selected = game;
+
+        var dialog = new EditGameDialog(game);
+        var result = await dialog.ShowDialog<EditResult?>(this);
+        if (result is null) return;
+
+        Vm?.UpdateGame(game,
+            result.Title,    result.Platform, result.Status,
+            result.Genre,    result.Developer,
+            result.HoursPlayed, result.Price, result.ReleaseYear, result.Rating);
+    }
 }
 
 // ── Status dot colour converter ────────────────────────────────────────────────
