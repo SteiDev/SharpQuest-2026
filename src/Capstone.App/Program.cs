@@ -115,6 +115,19 @@ while (true)
             break;
         }
 
+        case "/addigdb":
+        {
+            if (parts.Length < 2 || !int.TryParse(parts[1], out var igdbId))
+            {
+                Error("Usage: /addigdb <igdb_id> [type=Physical|Digital] [platform=PC] [status=Backlog]");
+                break;
+            }
+            var opts = ParseKeyValues(parts[2..]);
+            bool added = await AddFromIgdb(store, igdbId, opts, nextId);
+            if (added) nextId++;
+            break;
+        }
+
         case "/help":
             PrintHelp();
             break;
@@ -223,6 +236,85 @@ static async Task SearchIgdb(string query)
         Console.WriteLine($"  [{g.Id}] {g.Name} ({g.ReleaseYear ?? 0}) — {g.PrimaryGenre ?? "?"} — {g.PrimaryCompany ?? "?"}");
 }
 
+/// <returns>True if the game was successfully added to the store.</returns>
+static async Task<bool> AddFromIgdb(GameStore store, int igdbId, Dictionary<string, string> opts, int currentNextId)
+{
+    Console.WriteLine($"  Fetching IGDB id {igdbId}...");
+    var client = new IgdbClient();
+    IgdbGame? igdb;
+    try { igdb = await client.GetByIdAsync(igdbId); }
+    catch (Exception ex) { Error($"IGDB request failed: {ex.Message}"); return false; }
+
+    if (igdb is null)
+    {
+        Error($"No game found with IGDB id {igdbId}. Check the id or your .env credentials.");
+        return false;
+    }
+
+    // ── Map IGDB fields → local model ────────────────────────────────────────
+    bool isPhysical = opts.TryGetValue("type", out var t) &&
+                      t.Equals("physical", StringComparison.OrdinalIgnoreCase);
+
+    var id = opts.GetValueOrDefault("id", $"igdb-{igdbId}");
+
+    // Platform: use override if given, otherwise try to guess from the IGDB name
+    Platform platform = Platform.Other;
+    if (opts.TryGetValue("platform", out var pStr))
+        Enum.TryParse(pStr, ignoreCase: true, out platform);
+
+    // Status: default Backlog, overridable
+    GameStatus status = GameStatus.Backlog;
+    if (opts.TryGetValue("status", out var sStr))
+        Enum.TryParse(sStr, ignoreCase: true, out status);
+
+    // Price: optional override
+    decimal? price = null;
+    if (opts.TryGetValue("price", out var prStr) && decimal.TryParse(prStr, out var prVal))
+        price = prVal;
+
+    var developer = new Developer { Name = igdb.PrimaryCompany ?? string.Empty };
+
+    BaseTrackableGame game = isPhysical
+        ? new PhysicalGame
+        {
+            Id          = id,
+            Title       = igdb.Name,
+            Platform    = platform,
+            Status      = status,
+            Price       = price,
+            ReleaseYear = igdb.ReleaseYear,
+            Genre       = igdb.PrimaryGenre,
+            Developer   = developer,
+            Description = igdb.Summary
+        }
+        : new DigitalGame
+        {
+            Id          = id,
+            Title       = igdb.Name,
+            Platform    = platform,
+            Status      = status,
+            Price       = price,
+            ReleaseYear = igdb.ReleaseYear,
+            Genre       = igdb.PrimaryGenre,
+            Developer   = developer,
+            Description = igdb.Summary
+        };
+
+    try
+    {
+        store.Add(game);
+        Console.WriteLine($"  ✓ Added [{game.Id}] {game.Title} ({game.ReleaseYear?.ToString() ?? "?"}) — {game.Genre ?? "?"} by {developer.Name}");
+        if (igdb.Summary is { Length: > 0 } summary)
+            Console.WriteLine($"    {summary[..Math.Min(120, summary.Length)]}{(summary.Length > 120 ? "…" : "")}");
+        return true;
+    }
+    catch (Exception ex)
+    {
+        Error($"Could not add to library: {ex.Message}");
+        return false;
+    }
+}
+
 static void PrintHelp()
 {
     Console.WriteLine("""
@@ -253,6 +345,19 @@ static void PrintHelp()
 
       /online [<title>]
           Search IGDB for <title> (default: Elden Ring). Requires .env creds.
+          Shows each result's IGDB numeric id, title, year, genre and developer.
+
+      /addigdb <igdb_id> [KEY=VALUE ...]
+          Fetch a game by its IGDB numeric id and add it to your library.
+          Optional KEY=VALUE overrides (case-insensitive):
+            Type        Physical | Digital  (default: Digital)
+            Id          unique string id    (default: igdb-<igdb_id>)
+            Platform    PC | PlayStation5 | NintendoSwitch | Xbox | …
+            Status      Backlog | Playing | Completed | Abandoned | Wishlist
+            Price       decimal (e.g. 24.99)
+
+          Example:
+            /addigdb 1877 Platform=PC Status=Playing Price=49.99
 
       /help
           Show this help.
