@@ -7,5 +7,5 @@ public class DigitalGame : BaseTrackableGame
 {
     public string? StoreFront { get; init; }
 
-    public override string Describe() => $"[Digital] {Title} on {Platform} — {HoursPlayed}h, {(Price.HasValue ? $"£{Price:F2}" : "free")}";
+    public override string Describe() => $"[Digital] {Title} on {Platform} — {HoursPlayed}h, {(Price.HasValue ? $"€{Price:F2}" : "free")}";
 }

@@ -162,7 +162,7 @@ static void PrintGame(SharpQuest.Contracts.IItem item, Lab04Wiring lab04, int in
     if (item is not BaseTrackableGame g) return;
     var num   = index > 0 ? $"{index,-4}" : "    ";
     var type  = lab04.Classify(g);
-    var price = g.Price.HasValue ? $"£{g.Price:F2}" : "free";
+    var price = g.Price.HasValue ? $"€{g.Price:F2}" : "free";
     var year  = g.ReleaseYear.HasValue ? g.ReleaseYear.ToString()! : "—";
     Console.WriteLine($"  {num} {type,-10} {g.Id,-10} {g.Title,-30} {g.Platform,-16} {g.Status,-12} {g.HoursPlayed,6:F1} {price,8} {year,6} {g.Genre ?? "—",-20} {g.Developer.Name,-20}");
 }

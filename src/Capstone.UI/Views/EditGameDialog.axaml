@@ -85,7 +85,7 @@
         <!-- Price + Year side by side -->
         <Grid ColumnDefinitions="*,12,*">
           <StackPanel Grid.Column="0" Spacing="4">
-            <TextBlock Text="PRICE (£)" FontSize="10" FontWeight="Bold"
+            <TextBlock Text="PRICE (€)" FontSize="10" FontWeight="Bold"
                        Foreground="#585b70" LetterSpacing="1"/>
             <TextBox x:Name="PriceBox" Watermark="29.99"/>
           </StackPanel>

@@ -142,7 +142,7 @@ public sealed class CatalogueViewModel : ICatalogueViewModel
     /// <inheritdoc/>
     public string Details =>
         _selected is BaseTrackableGame g
-            ? $"{g.Title}  ·  {g.Platform}  ·  {g.Status}  ·  {g.HoursPlayed:F0}h  ·  {(g.Price.HasValue ? $"£{g.Price:F2}" : "free")}  ·  {g.Genre ?? "—"}  ·  {g.Developer.Name}"
+            ? $"{g.Title}  ·  {g.Platform}  ·  {g.Status}  ·  {g.HoursPlayed:F0}h  ·  {(g.Price.HasValue ? $"€{g.Price:F2}" : "free")}  ·  {g.Genre ?? "—"}  ·  {g.Developer.Name}"
             : _selected is not null
                 ? $"{_selected.DisplayName} [{_selected.Id}]"
                 : "No game selected.";
@@ -154,7 +154,7 @@ public sealed class CatalogueViewModel : ICatalogueViewModel
     public string SelectedPlatform    => Game?.Platform.ToString() ?? "—";
     public string SelectedStatus      => Game?.Status.ToString()   ?? "—";
     public string SelectedHours       => Game is { } g ? $"{g.HoursPlayed:F0} h" : "—";
-    public string SelectedPrice       => Game is { Price: { } p } ? $"£{p:F2}" : Game is not null ? "Free" : "—";
+    public string SelectedPrice       => Game is { Price: { } p } ? $"€{p:F2}" : Game is not null ? "Free" : "—";
     public string SelectedGenre       => Game?.Genre ?? "—";
     public string SelectedDeveloper   => Game?.Developer.Name ?? "—";
     public string SelectedRating      => Game?.Rating?.ToString() ?? "Not rated";

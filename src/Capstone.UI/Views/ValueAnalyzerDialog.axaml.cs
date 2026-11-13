@@ -64,9 +64,9 @@ public partial class ValueAnalyzerDialog : Window
         if (totalHours > 0 && totalSpent > 0)
             avgCph = totalSpent / (decimal)totalHours;
 
-        TotalSpentLabel.Text     = $"£{totalSpent:F2}";
+        TotalSpentLabel.Text     = $"€{totalSpent:F2}";
         TotalHoursLabel.Text     = $"{totalHours:F0} h";
-        AvgCostPerHourLabel.Text = avgCph.HasValue ? $"£{avgCph:F2}" : "—";
+        AvgCostPerHourLabel.Text = avgCph.HasValue ? $"€{avgCph:F2}" : "—";
         BacklogHoursLabel.Text   = backlogTotal > 0 ? $"{backlogTotal:F0} h" : "—";
         GamesCountLabel.Text     = games.Count.ToString();
 
@@ -105,8 +105,8 @@ public partial class ValueAnalyzerDialog : Window
             Platform         = g.Platform.ToString(),
             Status           = g.Status.ToString(),
             HoursPlayed      = $"{g.HoursPlayed:F0} h",
-            Price            = g.Price.HasValue ? $"£{g.Price:F2}" : "Free",
-            CostPerHour      = cph.HasValue ? $"£{cph:F2}" : "—",
+            Price            = g.Price.HasValue ? $"€{g.Price:F2}" : "Free",
+            CostPerHour      = cph.HasValue ? $"€{cph:F2}" : "—",
             BacklogRemaining = bhr.HasValue ? $"{bhr:F0} h" : "—",
             RawCostPerHour   = cph,
             CostColour       = CostColour(cph),
@@ -119,9 +119,9 @@ public partial class ValueAnalyzerDialog : Window
     private static IBrush CostColour(decimal? cph) => cph switch
     {
         null           => new SolidColorBrush(Color.Parse("#585b70")),
-        <= 0.50m       => new SolidColorBrush(Color.Parse("#a6e3a1")),   // green  ≤ £0.50/hr
-        <= 1.50m       => new SolidColorBrush(Color.Parse("#f9e2af")),   // yellow ≤ £1.50/hr
-        _              => new SolidColorBrush(Color.Parse("#f38ba8")),   // red    > £1.50/hr
+        <= 0.50m       => new SolidColorBrush(Color.Parse("#a6e3a1")),   // green  ≤ €0.50/hr
+        <= 1.50m       => new SolidColorBrush(Color.Parse("#f9e2af")),   // yellow ≤ €1.50/hr
+        _              => new SolidColorBrush(Color.Parse("#f38ba8")),   // red    > €1.50/hr
     };
 
     private static (string bg, string fg) StatusColours(GameStatus s) => s switch
