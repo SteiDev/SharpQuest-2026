@@ -82,6 +82,14 @@ public sealed class CatalogueViewModel : ICatalogueViewModel
             _selected = value;
             Notify(nameof(Selected));
             Notify(nameof(Details));
+            Notify(nameof(SelectedPlatform));
+            Notify(nameof(SelectedStatus));
+            Notify(nameof(SelectedHours));
+            Notify(nameof(SelectedPrice));
+            Notify(nameof(SelectedGenre));
+            Notify(nameof(SelectedDeveloper));
+            Notify(nameof(SelectedRating));
+            Notify(nameof(SelectedReleaseYear));
             ((RelayCommand)RemoveCommand).RaiseCanExecuteChanged();
         }
     }
@@ -93,6 +101,19 @@ public sealed class CatalogueViewModel : ICatalogueViewModel
             : _selected is not null
                 ? $"{_selected.DisplayName} [{_selected.Id}]"
                 : "No game selected.";
+
+    // ── Per-field detail properties (resolved from Selected) ─────────────────
+
+    private BaseTrackableGame? Game => _selected as BaseTrackableGame;
+
+    public string SelectedPlatform    => Game?.Platform.ToString() ?? "—";
+    public string SelectedStatus      => Game?.Status.ToString()   ?? "—";
+    public string SelectedHours       => Game is { } g ? $"{g.HoursPlayed:F0} h" : "—";
+    public string SelectedPrice       => Game is { Price: { } p } ? $"£{p:F2}" : Game is not null ? "Free" : "—";
+    public string SelectedGenre       => Game?.Genre ?? "—";
+    public string SelectedDeveloper   => Game?.Developer.Name ?? "—";
+    public string SelectedRating      => Game?.Rating?.ToString() ?? "Not rated";
+    public string SelectedReleaseYear => Game?.ReleaseYear?.ToString() ?? "—";
 
     /// <inheritdoc/>
     public int Count => _items.Count;
