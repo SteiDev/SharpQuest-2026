@@ -1,6 +1,9 @@
+using System.Globalization;
 using Avalonia.Controls;
+using Avalonia.Data.Converters;
 using Avalonia.Input;
 using Avalonia.Interactivity;
+using Avalonia.Media;
 using Capstone.Core.Models;
 using Capstone.Core.Models.Enums;
 using Capstone.Core.Models.Interfaces;
@@ -90,4 +93,32 @@ public partial class MainWindow : Window
         if (result is not null)
             Vm?.AddCommand.Execute(result);
     }
+}
+
+// ── Status dot colour converter ────────────────────────────────────────────────
+
+/// <summary>
+/// Maps a GameStatus enum value to a coloured dot brush for the list item indicator.
+/// </summary>
+public sealed class StatusDotConverter : IValueConverter
+{
+    public static readonly StatusDotConverter Instance = new();
+
+    public object Convert(object? value, Type targetType, object? parameter, CultureInfo culture) =>
+        value is GameStatus status
+            ? new SolidColorBrush(Color.Parse(StatusToHex(status)))
+            : Brushes.Gray;
+
+    public object ConvertBack(object? value, Type targetType, object? parameter, CultureInfo culture) =>
+        throw new NotSupportedException();
+
+    private static string StatusToHex(GameStatus s) => s switch
+    {
+        GameStatus.Playing   => "#a6e3a1",   // green  — active
+        GameStatus.Completed => "#89b4fa",   // blue   — done
+        GameStatus.Backlog   => "#f9e2af",   // yellow — waiting
+        GameStatus.Wishlist  => "#cba6f7",   // mauve  — want
+        GameStatus.Abandoned => "#f38ba8",   // red    — dropped
+        _                    => "#585b70"
+    };
 }

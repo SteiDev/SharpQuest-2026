@@ -22,6 +22,7 @@
   <!-- AXAML files need to be compiled by Avalonia's source generator. -->
   <ItemGroup>
     <AvaloniaResource Include="Assets\**" />
+    <AvaloniaResource Include="Styles\**" />
   </ItemGroup>
 
 </Project>

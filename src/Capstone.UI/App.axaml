@@ -5,6 +5,7 @@
 
   <Application.Styles>
     <FluentTheme />
+    <StyleInclude Source="avares://Capstone.UI/Styles/Theme.axaml"/>
   </Application.Styles>
 
 </Application>

@@ -1,0 +1,155 @@
+<Styles xmlns="https://github.com/avaloniaui"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+
+  <!-- ═══════════════════════════════════════════════════════════════════════
+       SharpQuest — Catppuccin Mocha-inspired dark theme
+       Palette reference:
+         Base      #1e1e2e   Mantle   #181825   Crust    #11111b
+         Surface0  #313244   Surface1 #45475a
+         Text      #cdd6f4   Subtext  #a6adc8   Overlay  #9399b2
+         Lavender  #b4befe   Mauve    #cba6f7   Pink     #f5c2e7
+         Green     #a6e3a1   Teal     #94e2d5   Sky      #89dceb
+         Blue      #89b4fa   Sapphire #74c7ec   Peach    #fab387
+         Red       #f38ba8   Yellow   #f9e2af
+  ═══════════════════════════════════════════════════════════════════════ -->
+
+  <!-- ── Global window background ─────────────────────────────────────── -->
+  <Style Selector="Window">
+    <Setter Property="Background" Value="#1e1e2e"/>
+    <Setter Property="FontFamily" Value="Inter,Segoe UI,Helvetica Neue,Arial,sans-serif"/>
+  </Style>
+
+  <!-- ── TextBlock defaults ────────────────────────────────────────────── -->
+  <Style Selector="TextBlock">
+    <Setter Property="Foreground" Value="#cdd6f4"/>
+    <Setter Property="FontSize"   Value="13"/>
+  </Style>
+
+  <!-- ── TextBox ───────────────────────────────────────────────────────── -->
+  <Style Selector="TextBox">
+    <Setter Property="Background"       Value="#313244"/>
+    <Setter Property="Foreground"       Value="#cdd6f4"/>
+    <Setter Property="CaretBrush"       Value="#cba6f7"/>
+    <Setter Property="SelectionBrush"   Value="#4b4580"/>
+    <Setter Property="BorderBrush"      Value="#45475a"/>
+    <Setter Property="BorderThickness"  Value="1"/>
+    <Setter Property="CornerRadius"     Value="6"/>
+    <Setter Property="Padding"          Value="10,7"/>
+    <Setter Property="FontSize"         Value="13"/>
+  </Style>
+  <Style Selector="TextBox:focus">
+    <Setter Property="BorderBrush" Value="#cba6f7"/>
+  </Style>
+  <Style Selector="TextBox /template/ TextBlock#PART_Watermark">
+    <Setter Property="Foreground" Value="#585b70"/>
+  </Style>
+
+  <!-- ── ComboBox ──────────────────────────────────────────────────────── -->
+  <Style Selector="ComboBox">
+    <Setter Property="Background"      Value="#313244"/>
+    <Setter Property="Foreground"      Value="#cdd6f4"/>
+    <Setter Property="BorderBrush"     Value="#45475a"/>
+    <Setter Property="BorderThickness" Value="1"/>
+    <Setter Property="CornerRadius"    Value="6"/>
+    <Setter Property="Padding"         Value="10,7"/>
+    <Setter Property="FontSize"        Value="13"/>
+  </Style>
+  <Style Selector="ComboBox:focus">
+    <Setter Property="BorderBrush" Value="#cba6f7"/>
+  </Style>
+  <Style Selector="ComboBoxItem">
+    <Setter Property="Foreground" Value="#cdd6f4"/>
+    <Setter Property="Background" Value="#313244"/>
+    <Setter Property="Padding"    Value="10,6"/>
+  </Style>
+  <Style Selector="ComboBoxItem:pointerover /template/ ContentPresenter">
+    <Setter Property="Background" Value="#45475a"/>
+  </Style>
+  <Style Selector="ComboBoxItem:selected /template/ ContentPresenter">
+    <Setter Property="Background" Value="#4b4580"/>
+  </Style>
+
+  <!-- ── Base Button ───────────────────────────────────────────────────── -->
+  <Style Selector="Button">
+    <Setter Property="Background"      Value="#45475a"/>
+    <Setter Property="Foreground"      Value="#cdd6f4"/>
+    <Setter Property="BorderThickness" Value="0"/>
+    <Setter Property="CornerRadius"    Value="6"/>
+    <Setter Property="Padding"         Value="14,8"/>
+    <Setter Property="FontSize"        Value="13"/>
+    <Setter Property="FontWeight"      Value="Medium"/>
+    <Setter Property="Cursor"          Value="Hand"/>
+  </Style>
+  <Style Selector="Button:pointerover /template/ ContentPresenter">
+    <Setter Property="Background" Value="#585b70"/>
+  </Style>
+  <Style Selector="Button:pressed /template/ ContentPresenter">
+    <Setter Property="Background" Value="#313244"/>
+  </Style>
+  <Style Selector="Button:disabled /template/ ContentPresenter">
+    <Setter Property="Background" Value="#313244"/>
+    <Setter Property="Opacity"    Value="0.4"/>
+  </Style>
+
+  <!-- ── Accent Button (.accent class) ────────────────────────────────── -->
+  <Style Selector="Button.accent">
+    <Setter Property="Background" Value="#cba6f7"/>
+    <Setter Property="Foreground" Value="#1e1e2e"/>
+    <Setter Property="FontWeight" Value="SemiBold"/>
+  </Style>
+  <Style Selector="Button.accent:pointerover /template/ ContentPresenter">
+    <Setter Property="Background" Value="#b4befe"/>
+  </Style>
+  <Style Selector="Button.accent:pressed /template/ ContentPresenter">
+    <Setter Property="Background" Value="#a897e4"/>
+  </Style>
+
+  <!-- ── Danger Button (.danger class) ────────────────────────────────── -->
+  <Style Selector="Button.danger">
+    <Setter Property="Background" Value="#3d1f28"/>
+    <Setter Property="Foreground" Value="#f38ba8"/>
+  </Style>
+  <Style Selector="Button.danger:pointerover /template/ ContentPresenter">
+    <Setter Property="Background" Value="#572030"/>
+  </Style>
+
+  <!-- ── ListBox ───────────────────────────────────────────────────────── -->
+  <Style Selector="ListBox">
+    <Setter Property="Background"      Value="#181825"/>
+    <Setter Property="BorderBrush"     Value="#313244"/>
+    <Setter Property="BorderThickness" Value="1"/>
+    <Setter Property="CornerRadius"    Value="8"/>
+    <Setter Property="Padding"         Value="4"/>
+    <Setter Property="ScrollViewer.HorizontalScrollBarVisibility" Value="Disabled"/>
+  </Style>
+  <Style Selector="ListBoxItem">
+    <Setter Property="Padding"       Value="10,8"/>
+    <Setter Property="CornerRadius"  Value="6"/>
+    <Setter Property="Margin"        Value="2,1"/>
+    <Setter Property="Background"    Value="Transparent"/>
+    <Setter Property="Foreground"    Value="#cdd6f4"/>
+  </Style>
+  <Style Selector="ListBoxItem:pointerover /template/ ContentPresenter">
+    <Setter Property="Background" Value="#313244"/>
+  </Style>
+  <Style Selector="ListBoxItem:selected /template/ ContentPresenter">
+    <Setter Property="Background" Value="#4b4580"/>
+  </Style>
+  <Style Selector="ListBoxItem:selected:pointerover /template/ ContentPresenter">
+    <Setter Property="Background" Value="#5a518a"/>
+  </Style>
+
+  <!-- ── ScrollBar ─────────────────────────────────────────────────────── -->
+  <Style Selector="ScrollBar">
+    <Setter Property="Opacity" Value="0.6"/>
+  </Style>
+
+  <!-- ── Separator ─────────────────────────────────────────────────────── -->
+  <Style Selector="Separator">
+    <Setter Property="Background" Value="#313244"/>
+    <Setter Property="Height"     Value="1"/>
+    <Setter Property="Margin"     Value="0,4"/>
+  </Style>
+
+</Styles>
+
