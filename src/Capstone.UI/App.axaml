@@ -3,10 +3,6 @@
              x:Class="Capstone.UI.App"
              RequestedThemeVariant="Dark">
 
-  <Application.Resources>
-    <FontFamily x:Key="NotoColorEmoji">avares://Capstone.UI/Assets/Fonts#Noto Color Emoji</FontFamily>
-  </Application.Resources>
-
   <Application.Styles>
     <FluentTheme />
     <StyleInclude Source="avares://Capstone.UI/Styles/Theme.axaml"/>
