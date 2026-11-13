@@ -83,25 +83,63 @@
       <Border Grid.Row="0"
               Background="#11111b"
               BorderBrush="#313244" BorderThickness="0,0,0,1"
-              Padding="16,8">
+              Padding="8,4">
         <Grid ColumnDefinitions="*,90,80,90,100,90">
-          <TextBlock Grid.Column="0" Text="GAME"
-                     FontSize="10" FontWeight="Bold" Foreground="#585b70" LetterSpacing="1"/>
-          <TextBlock Grid.Column="1" Text="STATUS"
-                     FontSize="10" FontWeight="Bold" Foreground="#585b70" LetterSpacing="1"
-                     HorizontalAlignment="Center"/>
-          <TextBlock Grid.Column="2" Text="HOURS"
-                     FontSize="10" FontWeight="Bold" Foreground="#585b70" LetterSpacing="1"
-                     HorizontalAlignment="Right"/>
-          <TextBlock Grid.Column="3" Text="PRICE"
-                     FontSize="10" FontWeight="Bold" Foreground="#585b70" LetterSpacing="1"
-                     HorizontalAlignment="Right"/>
-          <TextBlock Grid.Column="4" Text="COST / HR"
-                     FontSize="10" FontWeight="Bold" Foreground="#585b70" LetterSpacing="1"
-                     HorizontalAlignment="Right"/>
-          <TextBlock Grid.Column="5" Text="BACKLOG HRS"
-                     FontSize="10" FontWeight="Bold" Foreground="#585b70" LetterSpacing="1"
-                     HorizontalAlignment="Right"/>
+
+          <!-- GAME -->
+          <Button Grid.Column="0" Classes="colhdr" Tag="Game"
+                  HorizontalAlignment="Left" Click="OnColumnHeaderClick">
+            <StackPanel Orientation="Horizontal" Spacing="4">
+              <TextBlock Text="GAME" FontSize="10" FontWeight="Bold" LetterSpacing="1"/>
+              <TextBlock x:Name="SortGame" FontSize="10" FontWeight="Bold" Foreground="#cba6f7"/>
+            </StackPanel>
+          </Button>
+
+          <!-- STATUS -->
+          <Button Grid.Column="1" Classes="colhdr" Tag="Status"
+                  HorizontalAlignment="Center" Click="OnColumnHeaderClick">
+            <StackPanel Orientation="Horizontal" Spacing="4">
+              <TextBlock Text="STATUS" FontSize="10" FontWeight="Bold" LetterSpacing="1"/>
+              <TextBlock x:Name="SortStatus" FontSize="10" FontWeight="Bold" Foreground="#cba6f7"/>
+            </StackPanel>
+          </Button>
+
+          <!-- HOURS -->
+          <Button Grid.Column="2" Classes="colhdr" Tag="Hours"
+                  HorizontalAlignment="Right" Click="OnColumnHeaderClick">
+            <StackPanel Orientation="Horizontal" Spacing="4">
+              <TextBlock Text="HOURS" FontSize="10" FontWeight="Bold" LetterSpacing="1"/>
+              <TextBlock x:Name="SortHours" FontSize="10" FontWeight="Bold" Foreground="#cba6f7"/>
+            </StackPanel>
+          </Button>
+
+          <!-- PRICE -->
+          <Button Grid.Column="3" Classes="colhdr" Tag="Price"
+                  HorizontalAlignment="Right" Click="OnColumnHeaderClick">
+            <StackPanel Orientation="Horizontal" Spacing="4">
+              <TextBlock Text="PRICE" FontSize="10" FontWeight="Bold" LetterSpacing="1"/>
+              <TextBlock x:Name="SortPrice" FontSize="10" FontWeight="Bold" Foreground="#cba6f7"/>
+            </StackPanel>
+          </Button>
+
+          <!-- COST / HR -->
+          <Button Grid.Column="4" Classes="colhdr" Tag="CostPerHour"
+                  HorizontalAlignment="Right" Click="OnColumnHeaderClick">
+            <StackPanel Orientation="Horizontal" Spacing="4">
+              <TextBlock Text="COST / HR" FontSize="10" FontWeight="Bold" LetterSpacing="1"/>
+              <TextBlock x:Name="SortCostPerHour" FontSize="10" FontWeight="Bold" Foreground="#cba6f7"/>
+            </StackPanel>
+          </Button>
+
+          <!-- BACKLOG HRS -->
+          <Button Grid.Column="5" Classes="colhdr" Tag="BacklogHrs"
+                  HorizontalAlignment="Right" Click="OnColumnHeaderClick">
+            <StackPanel Orientation="Horizontal" Spacing="4">
+              <TextBlock Text="BACKLOG HRS" FontSize="10" FontWeight="Bold" LetterSpacing="1"/>
+              <TextBlock x:Name="SortBacklogHrs" FontSize="10" FontWeight="Bold" Foreground="#cba6f7"/>
+            </StackPanel>
+          </Button>
+
         </Grid>
       </Border>
 

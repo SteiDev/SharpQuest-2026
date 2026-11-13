@@ -113,6 +113,21 @@
     <Setter Property="Background" Value="#572030"/>
   </Style>
 
+  <!-- ── Column sort header (.colhdr class) — flat clickable table header ── -->
+  <Style Selector="Button.colhdr">
+    <Setter Property="Background"      Value="Transparent"/>
+    <Setter Property="Foreground"      Value="#585b70"/>
+    <Setter Property="BorderThickness" Value="0"/>
+    <Setter Property="Padding"         Value="8,4"/>
+    <Setter Property="Cursor"          Value="Hand"/>
+  </Style>
+  <Style Selector="Button.colhdr:pointerover /template/ ContentPresenter">
+    <Setter Property="Background" Value="Transparent"/>
+  </Style>
+  <Style Selector="Button.colhdr:pointerover">
+    <Setter Property="Foreground" Value="#a6adc8"/>
+  </Style>
+
   <!-- ── Filter Chip (.chip class) — inactive toggle pill ─────────────── -->
   <Style Selector="Button.chip">
     <Setter Property="Background"      Value="#313244"/>

@@ -13,27 +13,41 @@ namespace Capstone.UI.Views;
 /// <summary>One row in the analyzer table — plain data, no framework dependency.</summary>
 public sealed class AnalyzerRow
 {
-    public string Title           { get; init; } = string.Empty;
-    public string Platform        { get; init; } = string.Empty;
-    public string Status          { get; init; } = string.Empty;
-    public string HoursPlayed     { get; init; } = string.Empty;
-    public string Price           { get; init; } = string.Empty;
-    public string CostPerHour     { get; init; } = string.Empty;
+    public string Title            { get; init; } = string.Empty;
+    public string Platform         { get; init; } = string.Empty;
+    public string Status           { get; init; } = string.Empty;
+    public string HoursPlayed      { get; init; } = string.Empty;
+    public string Price            { get; init; } = string.Empty;
+    public string CostPerHour      { get; init; } = string.Empty;
     public string BacklogRemaining { get; init; } = string.Empty;
 
     // Visual helpers (colour-coded cost and status pill)
-    public IBrush CostColour        { get; init; } = Brushes.Gray;
-    public IBrush StatusBackground  { get; init; } = Brushes.Transparent;
-    public IBrush StatusForeground  { get; init; } = Brushes.Gray;
+    public IBrush CostColour       { get; init; } = Brushes.Gray;
+    public IBrush StatusBackground { get; init; } = Brushes.Transparent;
+    public IBrush StatusForeground { get; init; } = Brushes.Gray;
 
-    // Raw value used for sorting
-    public decimal? RawCostPerHour { get; init; }
+    // Raw values used for sorting
+    public decimal? RawCostPerHour   { get; init; }
+    public decimal? RawPrice         { get; init; }
+    public double   RawHours         { get; init; }
+    public double?  RawBacklogHrs    { get; init; }
+    public string   RawStatus        { get; init; } = string.Empty;
 }
 
 // ── Dialog ────────────────────────────────────────────────────────────────────
 
 public partial class ValueAnalyzerDialog : Window
 {
+    // All rows, unsorted — sort is applied on top without rebuilding them.
+    private List<AnalyzerRow> _allRows = new();
+
+    // Current sort state
+    private string _sortColumn    = "CostPerHour";   // default sort
+    private bool   _sortAscending = true;
+
+    // Map column tag → the sort-indicator TextBlock
+    private Dictionary<string, TextBlock> _indicators = new();
+
     public ValueAnalyzerDialog(IItemStore store)
     {
         InitializeComponent();
@@ -45,17 +59,26 @@ public partial class ValueAnalyzerDialog : Window
 
     private void Build(IItemStore store)
     {
+        // Wire up sort-indicator TextBlocks by name
+        _indicators = new Dictionary<string, TextBlock>
+        {
+            ["Game"]       = SortGame,
+            ["Status"]     = SortStatus,
+            ["Hours"]      = SortHours,
+            ["Price"]      = SortPrice,
+            ["CostPerHour"]= SortCostPerHour,
+            ["BacklogHrs"] = SortBacklogHrs,
+        };
+
         // Collect all trackable games — DigitalGame, Game, PhysicalGame, etc.
-        // The IValueAnalyzer interface only accepts Game, so we compute the
-        // same formulas directly from BaseTrackableGame to cover every subtype.
         var games = store.All()
             .OfType<BaseTrackableGame>()
             .ToList();
 
         // ── Summary numbers ──────────────────────────────────────────────────
-        decimal totalSpent    = games.Where(g => g.Price.HasValue).Sum(g => g.Price!.Value);
-        double  totalHours    = games.Sum(g => g.HoursPlayed);
-        double  backlogTotal  = games
+        decimal totalSpent   = games.Where(g => g.Price.HasValue).Sum(g => g.Price!.Value);
+        double  totalHours   = games.Sum(g => g.HoursPlayed);
+        double  backlogTotal = games
             .Select(g => CostPerHour_BacklogHrs(g).backlog)
             .Where(h => h.HasValue)
             .Sum(h => h!.Value);
@@ -71,14 +94,62 @@ public partial class ValueAnalyzerDialog : Window
         GamesCountLabel.Text     = games.Count.ToString();
 
         // ── Build rows ───────────────────────────────────────────────────────
-        var rows = games
-            .Select(g => BuildRow(g))
-            .OrderBy(r => r.RawCostPerHour ?? decimal.MaxValue)   // nulls (no price/hours) go last
-            .ThenBy(r => r.Title)
-            .ToList();
+        _allRows = games.Select(BuildRow).ToList();
 
-        GameRows.ItemsSource = rows;
+        ApplySort();
     }
+
+    // ── Column header click ───────────────────────────────────────────────────
+
+    private void OnColumnHeaderClick(object? sender, RoutedEventArgs e)
+    {
+        if (sender is not Button btn || btn.Tag is not string col) return;
+
+        if (_sortColumn == col)
+            _sortAscending = !_sortAscending;   // same column → flip direction
+        else
+        {
+            _sortColumn    = col;
+            _sortAscending = true;              // new column → start ascending
+        }
+
+        ApplySort();
+    }
+
+    private void ApplySort()
+    {
+        // Sort the rows
+        IEnumerable<AnalyzerRow> sorted = _sortColumn switch
+        {
+            "Game"       => Order(_allRows, r => r.Title),
+            "Status"     => Order(_allRows, r => r.RawStatus),
+            "Hours"      => Order(_allRows, r => r.RawHours),
+            "Price"      => Order(_allRows, r => r.RawPrice ?? decimal.MaxValue),
+            "CostPerHour"=> Order(_allRows, r => r.RawCostPerHour ?? decimal.MaxValue),
+            "BacklogHrs" => Order(_allRows, r => r.RawBacklogHrs ?? double.MaxValue),
+            _            => _allRows,
+        };
+
+        GameRows.ItemsSource = sorted.ToList();
+
+        // Update all indicator TextBlocks
+        foreach (var (col, tb) in _indicators)
+        {
+            if (col == _sortColumn)
+                tb.Text = _sortAscending ? " ▲" : " ▼";
+            else
+                tb.Text = string.Empty;
+        }
+    }
+
+    private IEnumerable<AnalyzerRow> Order<TKey>(
+        IEnumerable<AnalyzerRow> rows, Func<AnalyzerRow, TKey> key)
+        where TKey : IComparable<TKey>
+        => _sortAscending
+            ? rows.OrderBy(key).ThenBy(r => r.Title)
+            : rows.OrderByDescending(key).ThenBy(r => r.Title);
+
+    // ── Row builder ───────────────────────────────────────────────────────────
 
     private static (decimal? cph, double? backlog) CostPerHour_BacklogHrs(BaseTrackableGame g)
     {
@@ -96,7 +167,6 @@ public partial class ValueAnalyzerDialog : Window
     private static AnalyzerRow BuildRow(BaseTrackableGame g)
     {
         var (cph, bhr) = CostPerHour_BacklogHrs(g);
-
         var (statusBg, statusFg) = StatusColours(g.Status);
 
         return new AnalyzerRow
@@ -108,7 +178,13 @@ public partial class ValueAnalyzerDialog : Window
             Price            = g.Price.HasValue ? $"€{g.Price:F2}" : "Free",
             CostPerHour      = cph.HasValue ? $"€{cph:F2}" : "—",
             BacklogRemaining = bhr.HasValue ? $"{bhr:F0} h" : "—",
+            // Raw sort keys
             RawCostPerHour   = cph,
+            RawPrice         = g.Price,
+            RawHours         = g.HoursPlayed,
+            RawBacklogHrs    = bhr,
+            RawStatus        = g.Status.ToString(),
+            // Visuals
             CostColour       = CostColour(cph),
             StatusBackground = new SolidColorBrush(Color.Parse(statusBg)),
             StatusForeground = new SolidColorBrush(Color.Parse(statusFg)),
@@ -118,10 +194,10 @@ public partial class ValueAnalyzerDialog : Window
     // Cost colour: green (great value) → yellow → red (expensive per hour)
     private static IBrush CostColour(decimal? cph) => cph switch
     {
-        null           => new SolidColorBrush(Color.Parse("#585b70")),
-        <= 0.50m       => new SolidColorBrush(Color.Parse("#a6e3a1")),   // green  ≤ €0.50/hr
-        <= 1.50m       => new SolidColorBrush(Color.Parse("#f9e2af")),   // yellow ≤ €1.50/hr
-        _              => new SolidColorBrush(Color.Parse("#f38ba8")),   // red    > €1.50/hr
+        null     => new SolidColorBrush(Color.Parse("#585b70")),
+        <= 0.50m => new SolidColorBrush(Color.Parse("#a6e3a1")),   // green  ≤ €0.50/hr
+        <= 1.50m => new SolidColorBrush(Color.Parse("#f9e2af")),   // yellow ≤ €1.50/hr
+        _        => new SolidColorBrush(Color.Parse("#f38ba8")),   // red    > €1.50/hr
     };
 
     private static (string bg, string fg) StatusColours(GameStatus s) => s switch
@@ -136,4 +212,3 @@ public partial class ValueAnalyzerDialog : Window
 
     private void OnClose(object? sender, RoutedEventArgs e) => Close();
 }
-
