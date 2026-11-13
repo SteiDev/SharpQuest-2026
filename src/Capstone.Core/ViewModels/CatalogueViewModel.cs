@@ -5,6 +5,7 @@ using System.Windows.Input;
 using Capstone.Core.Models;
 using Capstone.Core.Models.Enums;
 using Capstone.Core.Models.Interfaces;
+using Capstone.Core.Models.Storage;
 using SharpQuest.Contracts;
 
 namespace Capstone.Core.ViewModels;
@@ -18,6 +19,9 @@ public sealed class CatalogueViewModel : ICatalogueViewModel
     // ── Backing store ─────────────────────────────────────────────────────────
 
     private readonly IItemStore _store;
+
+    /// <summary>Optional SQLite repository — wired by the UI host for persistence.</summary>
+    private readonly GameRepository? _repo;
 
     /// <summary>
     /// The single observable collection the window binds to — never replaced.
@@ -33,9 +37,12 @@ public sealed class CatalogueViewModel : ICatalogueViewModel
 
     // ── Constructor ───────────────────────────────────────────────────────────
 
-    public CatalogueViewModel(IItemStore store)
+    /// <param name="store">In-memory item store (required).</param>
+    /// <param name="repo">SQLite repository for persistence (optional; pass null in tests).</param>
+    public CatalogueViewModel(IItemStore store, GameRepository? repo = null)
     {
         _store = store ?? throw new ArgumentNullException(nameof(store));
+        _repo  = repo;
 
         // Seed from whatever is already in the store.
         _items = new ObservableCollection<IItem>(store.All());
@@ -163,6 +170,9 @@ public sealed class CatalogueViewModel : ICatalogueViewModel
         Notify(nameof(SelectedRating));
         Notify(nameof(SelectedReleaseYear));
 
+        // Persist the changes.
+        _repo?.Update(game);
+
         // Refresh the list item (DisplayName may have changed).
         var idx = _items.IndexOf(game);
         if (idx >= 0)
@@ -205,6 +215,7 @@ public sealed class CatalogueViewModel : ICatalogueViewModel
         _store.Remove(id);
         var toRemove = _items.FirstOrDefault(i => i.Id == id);
         if (toRemove is not null) _items.Remove(toRemove);
+        _repo?.Delete(id);
     }
 
     // ── Event handler: store item added ───────────────────────────────────────

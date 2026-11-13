@@ -6,4 +6,7 @@
   <ItemGroup>
     <Folder Include="Models\Storage\" />
   </ItemGroup>
+  <ItemGroup>
+    <PackageReference Include="Microsoft.Data.Sqlite" />
+  </ItemGroup>
 </Project>
