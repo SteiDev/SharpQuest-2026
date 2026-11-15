@@ -1,0 +1,239 @@
+<Window xmlns="https://github.com/avaloniaui"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        x:Class="Capstone.UI.Views.SettingsDialog"
+        Title="Settings — SharpQuest"
+        Width="700" Height="520"
+        MinWidth="560" MinHeight="420"
+        WindowStartupLocation="CenterOwner"
+        Background="#1e1e2e"
+        KeyDown="OnWindowKeyDown">
+
+  <Grid RowDefinitions="Auto,*,Auto">
+
+    <!-- ── Header ─────────────────────────────────────────────────────────── -->
+    <Border Grid.Row="0"
+            Background="#11111b"
+            BorderBrush="#313244" BorderThickness="0,0,0,1"
+            Padding="20,14">
+      <Grid ColumnDefinitions="*,Auto">
+        <StackPanel Grid.Column="0" Orientation="Horizontal" Spacing="10" VerticalAlignment="Center">
+          <Border Background="#cba6f7" CornerRadius="6"
+                  Width="30" Height="30" VerticalAlignment="Center">
+            <TextBlock Text="⚙" FontSize="16"
+                       Foreground="#1e1e2e"
+                       HorizontalAlignment="Center"
+                       VerticalAlignment="Center"/>
+          </Border>
+          <StackPanel Spacing="2">
+            <TextBlock x:Name="HeaderTitle" Text="Settings" FontSize="15" FontWeight="Bold" Foreground="#cdd6f4"/>
+            <TextBlock x:Name="HeaderSubtitle" Text="Configure SharpQuest preferences and integrations"
+                       FontSize="11" Foreground="#585b70"/>
+          </StackPanel>
+        </StackPanel>
+
+        <Button Grid.Column="1"
+                Content="✕"
+                Padding="10,6"
+                FontSize="12"
+                Click="OnCloseClick"
+                ToolTip.Tip="Close (Esc)"/>
+      </Grid>
+    </Border>
+
+    <!-- ── Body Area ──────────────────────────────────────────────────────── -->
+    <Grid Grid.Row="1">
+
+      <!-- ── View 1: Settings Menu ──────────────────────────────────────── -->
+      <ScrollViewer x:Name="MenuView" IsVisible="True" Padding="20,16">
+        <StackPanel Spacing="12">
+
+          <TextBlock Text="CONFIGURATION" FontSize="10" FontWeight="Bold"
+                     Foreground="#585b70" LetterSpacing="1" Margin="2,0,0,4"/>
+
+          <!-- Setting 1: Environment Variables (.env) -->
+          <Border Background="#181825"
+                  BorderBrush="#45475a" BorderThickness="1"
+                  CornerRadius="8"
+                  Padding="16,14">
+            <Grid ColumnDefinitions="Auto,*,Auto">
+              <Border Grid.Column="0" Background="#313244" CornerRadius="8"
+                      Width="38" Height="38" Margin="0,0,14,0"
+                      VerticalAlignment="Center">
+                <TextBlock Text="🔑" FontSize="18"
+                           HorizontalAlignment="Center"
+                           VerticalAlignment="Center"/>
+              </Border>
+
+              <StackPanel Grid.Column="1" VerticalAlignment="Center" Spacing="3" Margin="0,0,12,0">
+                <StackPanel Orientation="Horizontal" Spacing="8">
+                  <TextBlock Text="Environment Variables (.env)"
+                             FontWeight="Bold" FontSize="14" Foreground="#cdd6f4"/>
+                  <Border Background="#313244" CornerRadius="4" Padding="6,1" VerticalAlignment="Center">
+                    <TextBlock Text=".env" FontSize="10" Foreground="#89b4fa" FontWeight="Medium"/>
+                  </Border>
+                </StackPanel>
+                <TextBlock Text="Edit API keys and environment variables (IGDB Client ID, Secret, etc.) stored in the .env file."
+                           FontSize="12" Foreground="#a6adc8" TextWrapping="Wrap"/>
+              </StackPanel>
+
+              <Button Grid.Column="2"
+                      Content="Edit .env"
+                      Classes="accent"
+                      Padding="14,8"
+                      VerticalAlignment="Center"
+                      Click="OnOpenEnvEditorClick"
+                      ToolTip.Tip="Open the .env file editor"/>
+            </Grid>
+          </Border>
+
+          <!-- Setting 2: Developer Console -->
+          <Border Background="#181825"
+                  BorderBrush="#313244" BorderThickness="1"
+                  CornerRadius="8"
+                  Padding="16,14">
+            <Grid ColumnDefinitions="Auto,*,Auto">
+              <Border Grid.Column="0" Background="#313244" CornerRadius="8"
+                      Width="38" Height="38" Margin="0,0,14,0"
+                      VerticalAlignment="Center">
+                <TextBlock Text="💻" FontSize="18"
+                           HorizontalAlignment="Center"
+                           VerticalAlignment="Center"/>
+              </Border>
+
+              <StackPanel Grid.Column="1" VerticalAlignment="Center" Spacing="3" Margin="0,0,12,0">
+                <TextBlock Text="Developer Console"
+                           FontWeight="Bold" FontSize="14" Foreground="#cdd6f4"/>
+                <TextBlock Text="Interactive in-memory diagnostic REPL. Press F12 or ~ anywhere to toggle."
+                           FontSize="12" Foreground="#6c7086" TextWrapping="Wrap"/>
+              </StackPanel>
+
+              <Border Grid.Column="2" Background="#313244" CornerRadius="6"
+                      Padding="10,6" VerticalAlignment="Center">
+                <TextBlock Text="F12 or ~" FontSize="12" FontWeight="SemiBold" Foreground="#cba6f7"/>
+              </Border>
+            </Grid>
+          </Border>
+
+          <!-- Setting 3: About & Diagnostics -->
+          <Border Background="#181825"
+                  BorderBrush="#313244" BorderThickness="1"
+                  CornerRadius="8"
+                  Padding="16,14">
+            <Grid ColumnDefinitions="Auto,*,Auto">
+              <Border Grid.Column="0" Background="#313244" CornerRadius="8"
+                      Width="38" Height="38" Margin="0,0,14,0"
+                      VerticalAlignment="Center">
+                <TextBlock Text="🎮" FontSize="18"
+                           HorizontalAlignment="Center"
+                           VerticalAlignment="Center"/>
+              </Border>
+
+              <StackPanel Grid.Column="1" VerticalAlignment="Center" Spacing="3" Margin="0,0,12,0">
+                <TextBlock Text="SharpQuest 2026"
+                           FontWeight="Bold" FontSize="14" Foreground="#cdd6f4"/>
+                <TextBlock Text="Cross-platform game catalogue powered by Avalonia UI &amp; .NET 9."
+                           FontSize="12" Foreground="#6c7086"/>
+              </StackPanel>
+
+              <Border Grid.Column="2" Background="#1e3a2f" CornerRadius="6"
+                      Padding="10,4" VerticalAlignment="Center">
+                <TextBlock Text="Active" FontSize="11" FontWeight="Bold" Foreground="#a6e3a1"/>
+              </Border>
+            </Grid>
+          </Border>
+
+        </StackPanel>
+      </ScrollViewer>
+
+      <!-- ── View 2: .env File Editor ───────────────────────────────────── -->
+      <Grid x:Name="EnvEditorView" IsVisible="False" RowDefinitions="Auto,*,Auto" Margin="20,16">
+
+        <!-- Editor Toolbar -->
+        <Grid Grid.Row="0" ColumnDefinitions="Auto,*,Auto" Margin="0,0,0,10">
+          <Button Grid.Column="0"
+                  Content="← Back to Settings"
+                  Padding="12,6"
+                  FontSize="12"
+                  Click="OnBackToMenuClick"/>
+
+          <TextBlock Grid.Column="1"
+                     x:Name="EnvFilePathLabel"
+                     Text=".env"
+                     FontSize="11" Foreground="#6c7086"
+                     VerticalAlignment="Center"
+                     HorizontalAlignment="Center"
+                     TextTrimming="CharacterEllipsis"
+                     Margin="10,0"/>
+
+          <Button Grid.Column="2"
+                  Content="📄 Load Example Template"
+                  Padding="10,6"
+                  FontSize="11"
+                  Click="OnLoadTemplateClick"
+                  ToolTip.Tip="Reset or populate with .env.example contents"/>
+        </Grid>
+
+        <!-- Editor Box -->
+        <Border Grid.Row="1"
+                Background="#11111b"
+                BorderBrush="#313244" BorderThickness="1"
+                CornerRadius="6">
+          <TextBox x:Name="EnvContentBox"
+                   AcceptsReturn="True"
+                   AcceptsTab="True"
+                   FontFamily="Consolas, DejaVu Sans Mono, Menlo, monospace"
+                   FontSize="12"
+                   Foreground="#cdd6f4"
+                   Background="Transparent"
+                   BorderThickness="0"
+                   Padding="12"
+                   Watermark="# KEY=VALUE environment variables..."/>
+        </Border>
+
+        <!-- Editor Actions & Status -->
+        <Grid Grid.Row="2" ColumnDefinitions="*,Auto,Auto" Margin="0,12,0,0">
+          <TextBlock Grid.Column="0"
+                     x:Name="SaveStatusText"
+                     Text=""
+                     FontSize="12"
+                     FontWeight="Medium"
+                     Foreground="#a6e3a1"
+                     VerticalAlignment="Center"/>
+
+          <Button Grid.Column="1"
+                  Content="Cancel"
+                  Padding="14,8"
+                  Margin="0,0,8,0"
+                  Click="OnBackToMenuClick"/>
+
+          <Button Grid.Column="2"
+                  Content="💾 Save &amp; Apply"
+                  Classes="accent"
+                  Padding="16,8"
+                  Click="OnSaveEnvClick"
+                  ToolTip.Tip="Save changes to .env and apply to current session"/>
+        </Grid>
+
+      </Grid>
+
+    </Grid>
+
+    <!-- ── Footer ─────────────────────────────────────────────────────────── -->
+    <Border Grid.Row="2"
+            Background="#11111b"
+            BorderBrush="#313244" BorderThickness="0,1,0,0"
+            Padding="20,12">
+      <Grid ColumnDefinitions="*,Auto">
+        <TextBlock Grid.Column="0"
+                   Text="Press Esc to go back or close."
+                   Foreground="#45475a" FontSize="11"
+                   VerticalAlignment="Center"/>
+        <Button Grid.Column="1"
+                Content="Close"
+                Padding="16,8"
+                Click="OnCloseClick"/>
+      </Grid>
+    </Border>
+
+  </Grid>
+</Window>

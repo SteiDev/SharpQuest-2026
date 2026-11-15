@@ -77,10 +77,17 @@ public partial class MainWindow : Window
 
     private CatalogueViewModel? Vm => DataContext as CatalogueViewModel;
 
-    // ── Keyboard shortcut: F12 or ~ toggles console ───────────────────────────
+    // ── Keyboard shortcut: Esc for Settings, F12 or ~ toggles console ───────
 
-    private void OnWindowKeyDown(object? sender, KeyEventArgs e)
+    private async void OnWindowKeyDown(object? sender, KeyEventArgs e)
     {
+        if (e.Key == Key.Escape)
+        {
+            e.Handled = true;
+            await OpenSettingsAsync();
+            return;
+        }
+
         bool isToggle = e.Key == Key.F12 ||
                         (e.Key == Key.OemTilde) ||
                         (e.Key == Key.Oem3);
@@ -151,6 +158,30 @@ public partial class MainWindow : Window
         ActiveFilterCount.Text = total > 0
             ? $"{total} filter{(total == 1 ? "" : "s")} active  ·  {Vm.Count} result{(Vm.Count == 1 ? "" : "s")}"
             : string.Empty;
+    }
+
+    // ── Settings ──────────────────────────────────────────────────────────────
+
+    private bool _isSettingsOpen = false;
+
+    private async void OnSettingsClick(object? sender, RoutedEventArgs e)
+    {
+        await OpenSettingsAsync();
+    }
+
+    private async Task OpenSettingsAsync()
+    {
+        if (_isSettingsOpen) return;
+        try
+        {
+            _isSettingsOpen = true;
+            var dialog = new SettingsDialog();
+            await dialog.ShowDialog(this);
+        }
+        finally
+        {
+            _isSettingsOpen = false;
+        }
     }
 
     // ── Value Analyzer ────────────────────────────────────────────────────────
