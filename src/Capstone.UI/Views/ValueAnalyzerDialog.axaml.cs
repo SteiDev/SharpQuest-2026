@@ -124,9 +124,9 @@ public partial class ValueAnalyzerDialog : Window
             "Game"       => Order(_allRows, r => r.Title),
             "Status"     => Order(_allRows, r => r.RawStatus),
             "Hours"      => Order(_allRows, r => r.RawHours),
-            "Price"      => Order(_allRows, r => r.RawPrice ?? decimal.MaxValue),
-            "CostPerHour"=> Order(_allRows, r => r.RawCostPerHour ?? decimal.MaxValue),
-            "BacklogHrs" => Order(_allRows, r => r.RawBacklogHrs ?? double.MaxValue),
+            "Price"      => OrderNullable(_allRows, r => r.RawPrice),
+            "CostPerHour"=> OrderNullable(_allRows, r => r.RawCostPerHour),
+            "BacklogHrs" => OrderNullable(_allRows, r => r.RawBacklogHrs),
             _            => _allRows,
         };
 
@@ -148,6 +148,17 @@ public partial class ValueAnalyzerDialog : Window
         => _sortAscending
             ? rows.OrderBy(key).ThenBy(r => r.Title)
             : rows.OrderByDescending(key).ThenBy(r => r.Title);
+
+    private IEnumerable<AnalyzerRow> OrderNullable<TKey>(
+        IEnumerable<AnalyzerRow> rows, Func<AnalyzerRow, TKey?> selector)
+        where TKey : struct, IComparable<TKey>
+        => _sortAscending
+            ? rows.OrderBy(r => selector(r).HasValue ? 0 : 1)
+                  .ThenBy(r => selector(r).GetValueOrDefault())
+                  .ThenBy(r => r.Title)
+            : rows.OrderBy(r => selector(r).HasValue ? 0 : 1)
+                  .ThenByDescending(r => selector(r).GetValueOrDefault())
+                  .ThenBy(r => r.Title);
 
     // ── Row builder ───────────────────────────────────────────────────────────
 
