@@ -8,14 +8,24 @@ namespace Capstone.UI.Views;
 
 public partial class SettingsDialog : Window
 {
+    private readonly Action? _openDevConsoleAction;
     private bool _inEditorView = false;
     private string _activeEnvPath = string.Empty;
 
-    public SettingsDialog()
+    public SettingsDialog() : this(null) { }
+
+    public SettingsDialog(Action? openDevConsoleAction = null)
     {
         InitializeComponent();
+        _openDevConsoleAction = openDevConsoleAction;
         _activeEnvPath = ResolveDotEnvPath();
         EnvFilePathLabel.Text = _activeEnvPath;
+    }
+
+    private void OnOpenDevConsoleClick(object? sender, RoutedEventArgs e)
+    {
+        Close();
+        _openDevConsoleAction?.Invoke();
     }
 
     // ── Navigation between views ──────────────────────────────────────────────

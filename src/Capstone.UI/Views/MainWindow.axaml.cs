@@ -175,7 +175,15 @@ public partial class MainWindow : Window
         try
         {
             _isSettingsOpen = true;
-            var dialog = new SettingsDialog();
+            var dialog = new SettingsDialog(() =>
+            {
+                if (_consoleVm is not null)
+                {
+                    _consoleVm.IsVisible = true;
+                    DevConsole.IsVisible = true;
+                    DevConsole.FocusInput();
+                }
+            });
             await dialog.ShowDialog(this);
         }
         finally
