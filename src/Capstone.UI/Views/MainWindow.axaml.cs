@@ -22,6 +22,7 @@ public partial class MainWindow : Window
     // so we can toggle their CSS class without binding overhead.
     private readonly Dictionary<Button, GameStatus> _statusChips   = new();
     private readonly Dictionary<Button, Platform>   _platformChips = new();
+    private readonly List<Button>                   _sortButtons   = new();
 
     public MainWindow()
     {
@@ -45,12 +46,26 @@ public partial class MainWindow : Window
         _platformChips[ChipAndroid] = Platform.Android;
         _platformChips[ChipIOS]     = Platform.iOS;
         _platformChips[ChipOther]   = Platform.Other;
+
+        // Register sort buttons
+        _sortButtons.AddRange([SortDefaultBtn, SortTitleBtn, SortHoursBtn, SortRatingBtn, SortPriceBtn, SortYearBtn, SortLengthBtn]);
     }
 
     private void OnDataContextChanged(object? sender, EventArgs e)
     {
         if (DataContext is CatalogueViewModel vm)
         {
+            RefreshGenreDropdown();
+
+            vm.PropertyChanged += (_, args) =>
+            {
+                if (args.PropertyName == nameof(CatalogueViewModel.Count) ||
+                    args.PropertyName == nameof(CatalogueViewModel.Filter))
+                {
+                    UpdateFilterCountLabel();
+                }
+            };
+
             var storeField = typeof(CatalogueViewModel)
                 .GetField("_store", System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance);
             var store = storeField?.GetValue(vm) as IItemStore;
@@ -107,6 +122,54 @@ public partial class MainWindow : Window
         FilterToggleBtn.Content = FilterBar.IsVisible ? "⊟ Filter" : "⊞ Filter";
     }
 
+    // ── Sort bar toggle & actions ─────────────────────────────────────────────
+
+    private void OnSortToggleClick(object? sender, RoutedEventArgs e)
+    {
+        SortBar.IsVisible = !SortBar.IsVisible;
+        SortToggleBtn.Content = SortBar.IsVisible ? "⊟ Sort" : "⇅ Sort";
+    }
+
+    private void OnSortFieldClick(object? sender, RoutedEventArgs e)
+    {
+        if (sender is not Button btn || Vm is null) return;
+        var tag = btn.Tag?.ToString();
+        if (Enum.TryParse<GameSortField>(tag, out var field))
+        {
+            Vm.SetSort(field);
+            UpdateSortUI();
+        }
+    }
+
+    private void OnSortDirectionClick(object? sender, RoutedEventArgs e)
+    {
+        if (Vm is null) return;
+        Vm.ToggleSortDirection();
+        UpdateSortUI();
+    }
+
+    private void OnResetSortClick(object? sender, RoutedEventArgs e)
+    {
+        if (Vm is null) return;
+        Vm.ResetSort();
+        UpdateSortUI();
+    }
+
+    private void UpdateSortUI()
+    {
+        if (Vm is null) return;
+        foreach (var btn in _sortButtons)
+        {
+            var tag = btn.Tag?.ToString();
+            if (Enum.TryParse<GameSortField>(tag, out var field) && field == Vm.CurrentSortField)
+                btn.Classes.Add("active");
+            else
+                btn.Classes.Remove("active");
+        }
+        CurrentSortLabel.Text = Vm.CurrentSortDescription;
+        SortDirectionBtn.Content = Vm.CurrentSortDirection == SortDirection.Ascending ? "▲ Ascending" : "▼ Descending";
+    }
+
     // ── Status chip click ─────────────────────────────────────────────────────
 
     private void OnStatusChipClick(object? sender, RoutedEventArgs e)
@@ -139,6 +202,56 @@ public partial class MainWindow : Window
         UpdateFilterCountLabel();
     }
 
+    // ── Advanced filter actions ───────────────────────────────────────────────
+
+    private void RefreshGenreDropdown()
+    {
+        if (Vm is null) return;
+        var genres = Vm.GetDistinctGenres();
+        GenreFilterBox.ItemsSource = genres;
+        if (GenreFilterBox.SelectedIndex < 0 && genres.Count > 0)
+            GenreFilterBox.SelectedIndex = 0;
+    }
+
+    private void OnGenreFilterChanged(object? sender, SelectionChangedEventArgs e)
+    {
+        if (Vm is null) return;
+        var selected = GenreFilterBox.SelectedItem as string;
+        Vm.SetGenreFilter(selected);
+        UpdateFilterCountLabel();
+    }
+
+    private void OnPriceFilterChanged(object? sender, SelectionChangedEventArgs e)
+    {
+        if (Vm is null) return;
+        var tag = (PriceFilterBox.SelectedItem as ComboBoxItem)?.Tag?.ToString() ?? "All";
+        Vm.SetPriceFilter(tag);
+        UpdateFilterCountLabel();
+    }
+
+    private void OnRatingFilterChanged(object? sender, SelectionChangedEventArgs e)
+    {
+        if (Vm is null) return;
+        var tag = (RatingFilterBox.SelectedItem as ComboBoxItem)?.Tag?.ToString() ?? "All";
+        Vm.SetRatingFilter(tag);
+        UpdateFilterCountLabel();
+    }
+
+    private void OnPlaytimeFilterChanged(object? sender, SelectionChangedEventArgs e)
+    {
+        if (Vm is null) return;
+        var tag = (PlaytimeFilterBox.SelectedItem as ComboBoxItem)?.Tag?.ToString() ?? "All";
+        Vm.SetPlaytimeFilter(tag);
+        UpdateFilterCountLabel();
+    }
+
+    private void OnSearchScopeChanged(object? sender, RoutedEventArgs e)
+    {
+        if (Vm is null) return;
+        Vm.SetSearchAllFields(SearchAllFieldsBox.IsChecked == true);
+        UpdateFilterCountLabel();
+    }
+
     // ── Clear filters ─────────────────────────────────────────────────────────
 
     private void OnClearFiltersClick(object? sender, RoutedEventArgs e)
@@ -148,6 +261,13 @@ public partial class MainWindow : Window
         foreach (var btn in _statusChips.Keys)   btn.Classes.Remove("active");
         foreach (var btn in _platformChips.Keys) btn.Classes.Remove("active");
 
+        if (GenreFilterBox.ItemsSource is IEnumerable<string> items && items.Any())
+            GenreFilterBox.SelectedIndex = 0;
+        PriceFilterBox.SelectedIndex = 0;
+        RatingFilterBox.SelectedIndex = 0;
+        PlaytimeFilterBox.SelectedIndex = 0;
+        SearchAllFieldsBox.IsChecked = false;
+
         UpdateFilterCountLabel();
     }
 
@@ -155,6 +275,12 @@ public partial class MainWindow : Window
     {
         if (Vm is null) return;
         int total = Vm.ActiveStatuses.Count + Vm.ActivePlatforms.Count;
+        if (!string.IsNullOrEmpty(Vm.SelectedGenreFilter) && Vm.SelectedGenreFilter != "All") total++;
+        if (Vm.SelectedPriceFilter != "All") total++;
+        if (Vm.SelectedRatingFilter != "All") total++;
+        if (Vm.SelectedPlaytimeFilter != "All") total++;
+        if (!string.IsNullOrEmpty(Vm.Filter)) total++;
+
         ActiveFilterCount.Text = total > 0
             ? $"{total} filter{(total == 1 ? "" : "s")} active  ·  {Vm.Count} result{(Vm.Count == 1 ? "" : "s")}"
             : string.Empty;
@@ -214,7 +340,10 @@ public partial class MainWindow : Window
         var dialog = new AddGameDialog();
         var result = await dialog.ShowDialog<DigitalGame?>(this);
         if (result is not null)
+        {
             Vm?.AddCommand.Execute(result);
+            RefreshGenreDropdown();
+        }
     }
 
     // ── Add from IGDB ─────────────────────────────────────────────────────────
@@ -224,7 +353,10 @@ public partial class MainWindow : Window
         var dialog = new IgdbSearchDialog();
         var result = await dialog.ShowDialog<DigitalGame?>(this);
         if (result is not null)
+        {
             Vm?.AddCommand.Execute(result);
+            RefreshGenreDropdown();
+        }
     }
 
     // ── Edit game (right-click context menu) ──────────────────────────────────
@@ -247,7 +379,8 @@ public partial class MainWindow : Window
         Vm?.UpdateGame(game,
             result.Title,    result.Platform, result.Status,
             result.Genre,    result.Developer,
-            result.HoursPlayed, result.Price, result.ReleaseYear, result.Rating);
+            result.HoursPlayed, result.Price, result.ReleaseYear, result.Rating,
+            result.Publisher, result.AverageCompleteHours, result.Description);
     }
 }
 

@@ -22,7 +22,7 @@ public abstract class BaseTrackableGame : IItem
     public GameStatus Status { get; set; } = GameStatus.Backlog;
     public decimal? Price { get; init; }
     public int? Rating { get; set; }   // null = haven't rated it
-    public string? Description { get; init; }
+    public string? Description { get; set; }
     public int? ReleaseYear { get; init; }
     public int? ReleaseMonth { get; init; }
     public Platform Platform { get; init; } = Platform.Other;
@@ -31,10 +31,13 @@ public abstract class BaseTrackableGame : IItem
     public double HoursPlayed { get; set; }
 
     /// <summary>Community / HLTB average hours to complete, for backlog estimation.</summary>
-    public double? AverageCompleteHours { get; init; }
+    public double? AverageCompleteHours { get; set; }
 
     /// <summary>Genre tag (e.g. "RPG", "FPS").</summary>
     public string? Genre { get; init; }
+
+    /// <summary>Publisher (e.g. "Sony Interactive Entertainment", "Devolver Digital").</summary>
+    public string? Publisher { get; set; }
 
     /// <summary>Returns a human-readable description of this game entry.</summary>
     public abstract string Describe();

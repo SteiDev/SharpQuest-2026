@@ -26,20 +26,41 @@ public sealed class GameRepository : IDisposable
         using var cmd = _conn.CreateCommand();
         cmd.CommandText = """
             CREATE TABLE IF NOT EXISTS Games (
-                Id            TEXT    PRIMARY KEY NOT NULL,
-                Title         TEXT    NOT NULL,
-                Kind          TEXT    NOT NULL DEFAULT 'Digital',
-                Platform      TEXT    NOT NULL DEFAULT 'Other',
-                Status        TEXT    NOT NULL DEFAULT 'Backlog',
-                Genre         TEXT,
-                DeveloperName TEXT    NOT NULL DEFAULT '',
-                HoursPlayed   REAL    NOT NULL DEFAULT 0,
-                Price         REAL,
-                ReleaseYear   INTEGER,
-                Rating        INTEGER
+                Id                   TEXT    PRIMARY KEY NOT NULL,
+                Title                TEXT    NOT NULL,
+                Kind                 TEXT    NOT NULL DEFAULT 'Digital',
+                Platform             TEXT    NOT NULL DEFAULT 'Other',
+                Status               TEXT    NOT NULL DEFAULT 'Backlog',
+                Genre                TEXT,
+                DeveloperName        TEXT    NOT NULL DEFAULT '',
+                HoursPlayed          REAL    NOT NULL DEFAULT 0,
+                Price                REAL,
+                ReleaseYear          INTEGER,
+                Rating               INTEGER,
+                Publisher            TEXT,
+                AverageCompleteHours REAL,
+                Description          TEXT
             );
             """;
         cmd.ExecuteNonQuery();
+
+        TryAddColumn("Publisher", "TEXT");
+        TryAddColumn("AverageCompleteHours", "REAL");
+        TryAddColumn("Description", "TEXT");
+    }
+
+    private void TryAddColumn(string col, string type)
+    {
+        try
+        {
+            using var cmd = _conn.CreateCommand();
+            cmd.CommandText = $"ALTER TABLE Games ADD COLUMN {col} {type};";
+            cmd.ExecuteNonQuery();
+        }
+        catch
+        {
+            // Column already exists
+        }
     }
 
     // ── Read ──────────────────────────────────────────────────────────────────
@@ -50,7 +71,7 @@ public sealed class GameRepository : IDisposable
         var list = new List<BaseTrackableGame>();
 
         using var cmd = _conn.CreateCommand();
-        cmd.CommandText = "SELECT Id,Title,Kind,Platform,Status,Genre,DeveloperName,HoursPlayed,Price,ReleaseYear,Rating FROM Games ORDER BY rowid;";
+        cmd.CommandText = "SELECT Id,Title,Kind,Platform,Status,Genre,DeveloperName,HoursPlayed,Price,ReleaseYear,Rating,Publisher,AverageCompleteHours,Description FROM Games ORDER BY rowid;";
 
         using var reader = cmd.ExecuteReader();
         while (reader.Read())
@@ -63,16 +84,19 @@ public sealed class GameRepository : IDisposable
                 ? new PhysicalGame()
                 : new DigitalGame();
 
-            SetInit(game, nameof(game.Id),          reader.GetString(0));
-            SetInit(game, nameof(game.Title),        reader.GetString(1));
-            SetInit(game, nameof(game.Platform),     platform);
-            SetProp(game, nameof(game.Status),       status);
-            SetInit(game, nameof(game.Genre),        reader.IsDBNull(5)  ? null : reader.GetString(5));
-            SetInit(game, "Developer",               new Developer { Name = reader.GetString(6) });
-            SetProp(game, nameof(game.HoursPlayed),  reader.GetDouble(7));
-            SetInit(game, nameof(game.Price),        reader.IsDBNull(8)  ? (decimal?)null : (decimal)reader.GetDouble(8));
-            SetInit(game, nameof(game.ReleaseYear),  reader.IsDBNull(9)  ? (int?)null : reader.GetInt32(9));
-            SetProp(game, nameof(game.Rating),       reader.IsDBNull(10) ? (int?)null : reader.GetInt32(10));
+            SetInit(game, nameof(game.Id),                   reader.GetString(0));
+            SetInit(game, nameof(game.Title),                reader.GetString(1));
+            SetInit(game, nameof(game.Platform),             platform);
+            SetProp(game, nameof(game.Status),               status);
+            SetInit(game, nameof(game.Genre),                reader.IsDBNull(5)  ? null : reader.GetString(5));
+            SetInit(game, "Developer",                       new Developer { Name = reader.GetString(6) });
+            SetProp(game, nameof(game.HoursPlayed),           reader.GetDouble(7));
+            SetInit(game, nameof(game.Price),                reader.IsDBNull(8)  ? (decimal?)null : (decimal)reader.GetDouble(8));
+            SetInit(game, nameof(game.ReleaseYear),           reader.IsDBNull(9)  ? (int?)null : reader.GetInt32(9));
+            SetProp(game, nameof(game.Rating),                reader.IsDBNull(10) ? (int?)null : reader.GetInt32(10));
+            SetProp(game, nameof(game.Publisher),             reader.IsDBNull(11) ? null : reader.GetString(11));
+            SetProp(game, nameof(game.AverageCompleteHours), reader.IsDBNull(12) ? (double?)null : reader.GetDouble(12));
+            SetProp(game, nameof(game.Description),          reader.IsDBNull(13) ? null : reader.GetString(13));
 
             list.Add(game);
         }
@@ -87,8 +111,8 @@ public sealed class GameRepository : IDisposable
     {
         using var cmd = _conn.CreateCommand();
         cmd.CommandText = """
-            INSERT INTO Games (Id,Title,Kind,Platform,Status,Genre,DeveloperName,HoursPlayed,Price,ReleaseYear,Rating)
-            VALUES ($id,$title,$kind,$platform,$status,$genre,$dev,$hours,$price,$year,$rating);
+            INSERT INTO Games (Id,Title,Kind,Platform,Status,Genre,DeveloperName,HoursPlayed,Price,ReleaseYear,Rating,Publisher,AverageCompleteHours,Description)
+            VALUES ($id,$title,$kind,$platform,$status,$genre,$dev,$hours,$price,$year,$rating,$publisher,$completionHours,$description);
             """;
         BindParams(cmd, game);
         cmd.ExecuteNonQuery();
@@ -102,7 +126,8 @@ public sealed class GameRepository : IDisposable
             UPDATE Games SET
                 Title=$title, Kind=$kind, Platform=$platform, Status=$status,
                 Genre=$genre, DeveloperName=$dev, HoursPlayed=$hours,
-                Price=$price, ReleaseYear=$year, Rating=$rating
+                Price=$price, ReleaseYear=$year, Rating=$rating,
+                Publisher=$publisher, AverageCompleteHours=$completionHours, Description=$description
             WHERE Id=$id;
             """;
         BindParams(cmd, game);
@@ -131,8 +156,11 @@ public sealed class GameRepository : IDisposable
         cmd.Parameters.AddWithValue("$dev",      game.Developer.Name);
         cmd.Parameters.AddWithValue("$hours",    game.HoursPlayed);
         cmd.Parameters.AddWithValue("$price",    game.Price.HasValue ? (object)(double)game.Price.Value : DBNull.Value);
-        cmd.Parameters.AddWithValue("$year",     (object?)game.ReleaseYear ?? DBNull.Value);
-        cmd.Parameters.AddWithValue("$rating",   (object?)game.Rating ?? DBNull.Value);
+        cmd.Parameters.AddWithValue("$year",            (object?)game.ReleaseYear ?? DBNull.Value);
+        cmd.Parameters.AddWithValue("$rating",          (object?)game.Rating ?? DBNull.Value);
+        cmd.Parameters.AddWithValue("$publisher",       (object?)game.Publisher ?? DBNull.Value);
+        cmd.Parameters.AddWithValue("$completionHours", (object?)game.AverageCompleteHours ?? DBNull.Value);
+        cmd.Parameters.AddWithValue("$description",     (object?)game.Description ?? DBNull.Value);
     }
 
     private static T ParseEnum<T>(string s) where T : struct, Enum =>

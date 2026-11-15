@@ -2,7 +2,7 @@
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         x:Class="Capstone.UI.Views.EditGameDialog"
         Title="Edit Game"
-        Width="440" Height="520"
+        Width="460" Height="580"
         WindowStartupLocation="CenterOwner"
         CanResize="False"
         Background="#1e1e2e">
@@ -54,19 +54,33 @@
           </StackPanel>
         </Grid>
 
-        <!-- Genre -->
-        <StackPanel Spacing="4">
-          <TextBlock Text="GENRE" FontSize="10" FontWeight="Bold"
-                     Foreground="#585b70" LetterSpacing="1"/>
-          <TextBox x:Name="GenreBox" Watermark="e.g. RPG, FPS, Strategy…"/>
-        </StackPanel>
+        <!-- Genre + Developer side by side -->
+        <Grid ColumnDefinitions="*,12,*">
+          <StackPanel Grid.Column="0" Spacing="4">
+            <TextBlock Text="GENRE" FontSize="10" FontWeight="Bold"
+                       Foreground="#585b70" LetterSpacing="1"/>
+            <TextBox x:Name="GenreBox" Watermark="e.g. RPG, FPS…"/>
+          </StackPanel>
+          <StackPanel Grid.Column="2" Spacing="4">
+            <TextBlock Text="DEVELOPER" FontSize="10" FontWeight="Bold"
+                       Foreground="#585b70" LetterSpacing="1"/>
+            <TextBox x:Name="DevBox" Watermark="e.g. FromSoftware"/>
+          </StackPanel>
+        </Grid>
 
-        <!-- Developer -->
-        <StackPanel Spacing="4">
-          <TextBlock Text="DEVELOPER" FontSize="10" FontWeight="Bold"
-                     Foreground="#585b70" LetterSpacing="1"/>
-          <TextBox x:Name="DevBox" Watermark="Studio name"/>
-        </StackPanel>
+        <!-- Publisher + Est. Hours side by side -->
+        <Grid ColumnDefinitions="*,12,*">
+          <StackPanel Grid.Column="0" Spacing="4">
+            <TextBlock Text="PUBLISHER" FontSize="10" FontWeight="Bold"
+                       Foreground="#585b70" LetterSpacing="1"/>
+            <TextBox x:Name="PublisherBox" Watermark="e.g. Bandai Namco"/>
+          </StackPanel>
+          <StackPanel Grid.Column="2" Spacing="4">
+            <TextBlock Text="EST. HOURS (HLTB)" FontSize="10" FontWeight="Bold"
+                       Foreground="#585b70" LetterSpacing="1"/>
+            <TextBox x:Name="CompleteHoursBox" Watermark="e.g. 55"/>
+          </StackPanel>
+        </Grid>
 
         <!-- Hours Played + Rating side by side -->
         <Grid ColumnDefinitions="*,12,*">
@@ -95,6 +109,17 @@
             <TextBox x:Name="YearBox" Watermark="2024"/>
           </StackPanel>
         </Grid>
+
+        <!-- Description / Notes -->
+        <StackPanel Spacing="4">
+          <TextBlock Text="DESCRIPTION / NOTES" FontSize="10" FontWeight="Bold"
+                     Foreground="#585b70" LetterSpacing="1"/>
+          <TextBox x:Name="DescriptionBox"
+                   Watermark="Personal notes, summary or backlog reminders…"
+                   AcceptsReturn="True"
+                   TextWrapping="Wrap"
+                   Height="64"/>
+        </StackPanel>
 
         <!-- Error -->
         <Border Background="#2d1520" CornerRadius="6" Padding="10,7"

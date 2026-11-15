@@ -18,7 +18,7 @@
             Background="#11111b"
             BorderBrush="#313244" BorderThickness="0,0,0,1"
             Padding="16,10">
-      <Grid ColumnDefinitions="Auto,*,Auto,Auto,Auto,Auto,Auto,Auto">
+      <Grid ColumnDefinitions="Auto,*,Auto,Auto,Auto,Auto,Auto,Auto,Auto">
 
         <!-- Brand -->
         <StackPanel Grid.Column="0" Orientation="Horizontal" Spacing="8"
@@ -40,14 +40,23 @@
         <!-- Filter toggle -->
         <Button Grid.Column="2"
                 x:Name="FilterToggleBtn"
-                Content="⊟ Filter"
+                Content="⊞ Filter"
                 Padding="12,8"
                 Margin="0,0,8,0"
                 Click="OnFilterToggleClick"
-                ToolTip.Tip="Show/hide filter bar"/>
+                ToolTip.Tip="Show/hide advanced filter bar"/>
+
+        <!-- Sort toggle -->
+        <Button Grid.Column="3"
+                x:Name="SortToggleBtn"
+                Content="⇅ Sort"
+                Padding="12,8"
+                Margin="0,0,8,0"
+                Click="OnSortToggleClick"
+                ToolTip.Tip="Show/hide sorting options"/>
 
         <!-- Value Analyzer -->
-        <Button Grid.Column="3"
+        <Button Grid.Column="4"
                 Content="€ Analyze"
                 Padding="12,8"
                 Margin="0,0,8,0"
@@ -55,7 +64,7 @@
                 ToolTip.Tip="Open the Value Analyzer"/>
 
         <!-- Add Manual -->
-        <Button Grid.Column="4"
+        <Button Grid.Column="5"
                 Content="+ Add Game"
                 Classes="accent"
                 Padding="14,8"
@@ -64,7 +73,7 @@
                 ToolTip.Tip="Add a game manually"/>
 
         <!-- Add from IGDB -->
-        <Button Grid.Column="5"
+        <Button Grid.Column="6"
                 Content="IGDB"
                 Padding="14,8"
                 Margin="0,0,8,0"
@@ -72,7 +81,7 @@
                 ToolTip.Tip="Fetch a game from IGDB"/>
 
         <!-- Remove -->
-        <Button Grid.Column="6"
+        <Button Grid.Column="7"
                 Content="Remove"
                 Classes="danger"
                 Padding="12,8"
@@ -81,7 +90,7 @@
                 ToolTip.Tip="Remove selected game"/>
 
         <!-- Settings -->
-        <Button Grid.Column="7"
+        <Button Grid.Column="8"
                 Content="⚙ Settings"
                 Padding="12,8"
                 Click="OnSettingsClick"
@@ -89,85 +98,225 @@
       </Grid>
     </Border>
 
-    <!-- ═══ FILTER BAR ════════════════════════════════════════════════════ -->
-    <Border Grid.Row="1" Grid.ColumnSpan="2"
-            x:Name="FilterBar"
-            Background="#181825"
-            BorderBrush="#313244" BorderThickness="0,0,0,1"
-            Padding="16,10"
-            IsVisible="False">
-      <Border.Styles>
-        <Style Selector="Border">
-          <Style.Animations>
-            <Animation Duration="0:0:0.18" FillMode="Forward" Easing="CubicEaseOut">
-              <KeyFrame Cue="0%">
-                <Setter Property="Opacity" Value="0.0"/>
-                <Setter Property="TranslateTransform.Y" Value="-8"/>
-              </KeyFrame>
-              <KeyFrame Cue="100%">
-                <Setter Property="Opacity" Value="1.0"/>
-                <Setter Property="TranslateTransform.Y" Value="0"/>
-              </KeyFrame>
-            </Animation>
-          </Style.Animations>
-        </Style>
-      </Border.Styles>
-      <StackPanel Spacing="10">
+    <!-- ═══ TOOLBAR BARS (FILTER & SORT) ════════════════════════════════ -->
+    <StackPanel Grid.Row="1" Grid.ColumnSpan="2">
 
-        <!-- Status chips -->
-        <StackPanel Orientation="Horizontal" Spacing="6">
-          <TextBlock Text="Status" Foreground="#6c7086" FontSize="11"
-                     VerticalAlignment="Center" Margin="0,0,6,0"/>
-          <Button x:Name="ChipBacklog"   Classes="chip" Content="Backlog"
-                  Click="OnStatusChipClick" Tag="Backlog"/>
-          <Button x:Name="ChipPlaying"   Classes="chip" Content="Playing"
-                  Click="OnStatusChipClick" Tag="Playing"/>
-          <Button x:Name="ChipCompleted" Classes="chip" Content="Completed"
-                  Click="OnStatusChipClick" Tag="Completed"/>
-          <Button x:Name="ChipAbandoned" Classes="chip" Content="Abandoned"
-                  Click="OnStatusChipClick" Tag="Abandoned"/>
-          <Button x:Name="ChipWishlist"  Classes="chip" Content="Wishlist"
-                  Click="OnStatusChipClick" Tag="Wishlist"/>
-        </StackPanel>
+      <!-- ── SORT BAR ────────────────────────────────────────────────── -->
+      <Border x:Name="SortBar"
+              Background="#181825"
+              BorderBrush="#313244" BorderThickness="0,0,0,1"
+              Padding="16,10"
+              IsVisible="False">
+        <Border.Styles>
+          <Style Selector="Border">
+            <Style.Animations>
+              <Animation Duration="0:0:0.18" FillMode="Forward" Easing="CubicEaseOut">
+                <KeyFrame Cue="0%">
+                  <Setter Property="Opacity" Value="0.0"/>
+                  <Setter Property="TranslateTransform.Y" Value="-8"/>
+                </KeyFrame>
+                <KeyFrame Cue="100%">
+                  <Setter Property="Opacity" Value="1.0"/>
+                  <Setter Property="TranslateTransform.Y" Value="0"/>
+                </KeyFrame>
+              </Animation>
+            </Style.Animations>
+          </Style>
+        </Border.Styles>
+        <Grid ColumnDefinitions="Auto,*,Auto,Auto">
 
-        <!-- Platform chips -->
-        <StackPanel Orientation="Horizontal" Spacing="6">
-          <TextBlock Text="Platform" Foreground="#6c7086" FontSize="11"
-                     VerticalAlignment="Center" Margin="0,0,6,0"/>
-          <Button x:Name="ChipPC"      Classes="chip" Content="PC"
-                  Click="OnPlatformChipClick" Tag="PC"/>
-          <Button x:Name="ChipPS4"     Classes="chip" Content="PS4"
-                  Click="OnPlatformChipClick" Tag="PlayStation4"/>
-          <Button x:Name="ChipPS5"     Classes="chip" Content="PS5"
-                  Click="OnPlatformChipClick" Tag="PlayStation5"/>
-          <Button x:Name="ChipXbox"    Classes="chip" Content="Xbox One"
-                  Click="OnPlatformChipClick" Tag="XboxOne"/>
-          <Button x:Name="ChipSwitch"  Classes="chip" Content="Switch"
-                  Click="OnPlatformChipClick" Tag="NintendoSwitch"/>
-          <Button x:Name="ChipSwitch2" Classes="chip" Content="Switch 2"
-                  Click="OnPlatformChipClick" Tag="NintendoSwitch2"/>
-          <Button x:Name="ChipAndroid" Classes="chip" Content="Android"
-                  Click="OnPlatformChipClick" Tag="Android"/>
-          <Button x:Name="ChipIOS"     Classes="chip" Content="iOS"
-                  Click="OnPlatformChipClick" Tag="iOS"/>
-          <Button x:Name="ChipOther"   Classes="chip" Content="Other"
-                  Click="OnPlatformChipClick" Tag="Other"/>
-        </StackPanel>
+          <!-- Sort field chips -->
+          <StackPanel Grid.Column="0" Orientation="Horizontal" Spacing="6" VerticalAlignment="Center">
+            <TextBlock Text="Sort by" Foreground="#6c7086" FontSize="11" FontWeight="Bold"
+                       VerticalAlignment="Center" Margin="0,0,6,0"/>
+            <Button x:Name="SortDefaultBtn"   Classes="chip active" Content="Default" Tag="Default" Click="OnSortFieldClick"/>
+            <Button x:Name="SortTitleBtn"     Classes="chip" Content="Title" Tag="Title" Click="OnSortFieldClick"/>
+            <Button x:Name="SortHoursBtn"     Classes="chip" Content="Hours" Tag="HoursPlayed" Click="OnSortFieldClick"/>
+            <Button x:Name="SortRatingBtn"    Classes="chip" Content="Rating" Tag="Rating" Click="OnSortFieldClick"/>
+            <Button x:Name="SortPriceBtn"     Classes="chip" Content="Price" Tag="Price" Click="OnSortFieldClick"/>
+            <Button x:Name="SortYearBtn"      Classes="chip" Content="Year" Tag="ReleaseYear" Click="OnSortFieldClick"/>
+            <Button x:Name="SortLengthBtn"    Classes="chip" Content="Est. Length" Tag="AverageCompleteHours" Click="OnSortFieldClick"/>
+          </StackPanel>
 
-        <!-- Clear filters -->
-        <StackPanel Orientation="Horizontal" Spacing="8">
-          <Button Content="✕ Clear filters"
+          <!-- Current sort badge -->
+          <StackPanel Grid.Column="1" Orientation="Horizontal" Spacing="8" Margin="16,0,0,0" VerticalAlignment="Center">
+            <Border Background="#1e1e2e" BorderBrush="#45475a" BorderThickness="1"
+                    CornerRadius="4" Padding="8,4">
+              <TextBlock x:Name="CurrentSortLabel"
+                         Text="Default (Store Order)"
+                         Foreground="#cba6f7"
+                         FontSize="11"
+                         FontWeight="Medium"/>
+            </Border>
+          </StackPanel>
+
+          <!-- Direction Toggle -->
+          <Button Grid.Column="2"
+                  x:Name="SortDirectionBtn"
+                  Content="▲ Ascending"
+                  Padding="10,6"
+                  Margin="0,0,8,0"
+                  FontSize="11"
+                  Click="OnSortDirectionClick"/>
+
+          <!-- Reset Sort -->
+          <Button Grid.Column="3"
+                  Content="✕ Reset"
                   Classes="danger"
-                  Padding="10,4"
-                  FontSize="12"
-                  Click="OnClearFiltersClick"/>
-          <TextBlock x:Name="ActiveFilterCount"
-                     Foreground="#6c7086" FontSize="11"
-                     VerticalAlignment="Center"/>
-        </StackPanel>
+                  Padding="10,6"
+                  FontSize="11"
+                  Click="OnResetSortClick"/>
+        </Grid>
+      </Border>
 
-      </StackPanel>
-    </Border>
+      <!-- ── FILTER BAR (WITH ADVANCED CAPABILITIES) ──────────────────── -->
+      <Border x:Name="FilterBar"
+              Background="#181825"
+              BorderBrush="#313244" BorderThickness="0,0,0,1"
+              Padding="16,10"
+              IsVisible="False">
+        <Border.Styles>
+          <Style Selector="Border">
+            <Style.Animations>
+              <Animation Duration="0:0:0.18" FillMode="Forward" Easing="CubicEaseOut">
+                <KeyFrame Cue="0%">
+                  <Setter Property="Opacity" Value="0.0"/>
+                  <Setter Property="TranslateTransform.Y" Value="-8"/>
+                </KeyFrame>
+                <KeyFrame Cue="100%">
+                  <Setter Property="Opacity" Value="1.0"/>
+                  <Setter Property="TranslateTransform.Y" Value="0"/>
+                </KeyFrame>
+              </Animation>
+            </Style.Animations>
+          </Style>
+        </Border.Styles>
+        <StackPanel Spacing="10">
+
+          <!-- Status chips -->
+          <StackPanel Orientation="Horizontal" Spacing="6">
+            <TextBlock Text="Status" Foreground="#6c7086" FontSize="11"
+                       VerticalAlignment="Center" Margin="0,0,6,0" MinWidth="56"/>
+            <Button x:Name="ChipBacklog"   Classes="chip" Content="Backlog"
+                    Click="OnStatusChipClick" Tag="Backlog"/>
+            <Button x:Name="ChipPlaying"   Classes="chip" Content="Playing"
+                    Click="OnStatusChipClick" Tag="Playing"/>
+            <Button x:Name="ChipCompleted" Classes="chip" Content="Completed"
+                    Click="OnStatusChipClick" Tag="Completed"/>
+            <Button x:Name="ChipAbandoned" Classes="chip" Content="Abandoned"
+                    Click="OnStatusChipClick" Tag="Abandoned"/>
+            <Button x:Name="ChipWishlist"  Classes="chip" Content="Wishlist"
+                    Click="OnStatusChipClick" Tag="Wishlist"/>
+          </StackPanel>
+
+          <!-- Platform chips -->
+          <StackPanel Orientation="Horizontal" Spacing="6">
+            <TextBlock Text="Platform" Foreground="#6c7086" FontSize="11"
+                       VerticalAlignment="Center" Margin="0,0,6,0" MinWidth="56"/>
+            <Button x:Name="ChipPC"      Classes="chip" Content="PC"
+                    Click="OnPlatformChipClick" Tag="PC"/>
+            <Button x:Name="ChipPS4"     Classes="chip" Content="PS4"
+                    Click="OnPlatformChipClick" Tag="PlayStation4"/>
+            <Button x:Name="ChipPS5"     Classes="chip" Content="PS5"
+                    Click="OnPlatformChipClick" Tag="PlayStation5"/>
+            <Button x:Name="ChipXbox"    Classes="chip" Content="Xbox One"
+                    Click="OnPlatformChipClick" Tag="XboxOne"/>
+            <Button x:Name="ChipSwitch"  Classes="chip" Content="Switch"
+                    Click="OnPlatformChipClick" Tag="NintendoSwitch"/>
+            <Button x:Name="ChipSwitch2" Classes="chip" Content="Switch 2"
+                    Click="OnPlatformChipClick" Tag="NintendoSwitch2"/>
+            <Button x:Name="ChipAndroid" Classes="chip" Content="Android"
+                    Click="OnPlatformChipClick" Tag="Android"/>
+            <Button x:Name="ChipIOS"     Classes="chip" Content="iOS"
+                    Click="OnPlatformChipClick" Tag="iOS"/>
+            <Button x:Name="ChipOther"   Classes="chip" Content="Other"
+                    Click="OnPlatformChipClick" Tag="Other"/>
+          </StackPanel>
+
+          <!-- Advanced Filters Row: Genre, Price, Rating, Playtime, Deep Search -->
+          <StackPanel Orientation="Horizontal" Spacing="10" VerticalAlignment="Center">
+            <TextBlock Text="Advanced" Foreground="#6c7086" FontSize="11"
+                       VerticalAlignment="Center" Margin="0,0,6,0" MinWidth="56"/>
+
+            <!-- Genre dropdown -->
+            <StackPanel Orientation="Horizontal" Spacing="4" VerticalAlignment="Center">
+              <TextBlock Text="Genre:" Foreground="#585b70" FontSize="11" VerticalAlignment="Center"/>
+              <ComboBox x:Name="GenreFilterBox"
+                        Width="130"
+                        SelectionChanged="OnGenreFilterChanged"/>
+            </StackPanel>
+
+            <!-- Price dropdown -->
+            <StackPanel Orientation="Horizontal" Spacing="4" VerticalAlignment="Center">
+              <TextBlock Text="Price:" Foreground="#585b70" FontSize="11" VerticalAlignment="Center"/>
+              <ComboBox x:Name="PriceFilterBox"
+                        Width="110"
+                        SelectedIndex="0"
+                        SelectionChanged="OnPriceFilterChanged">
+                <ComboBoxItem Content="All Prices" Tag="All"/>
+                <ComboBoxItem Content="Free Only" Tag="Free"/>
+                <ComboBoxItem Content="Paid Only" Tag="Paid"/>
+                <ComboBoxItem Content="≤ €20" Tag="Under20"/>
+                <ComboBoxItem Content="≤ €50" Tag="Under50"/>
+              </ComboBox>
+            </StackPanel>
+
+            <!-- Rating dropdown -->
+            <StackPanel Orientation="Horizontal" Spacing="4" VerticalAlignment="Center">
+              <TextBlock Text="Rating:" Foreground="#585b70" FontSize="11" VerticalAlignment="Center"/>
+              <ComboBox x:Name="RatingFilterBox"
+                        Width="115"
+                        SelectedIndex="0"
+                        SelectionChanged="OnRatingFilterChanged">
+                <ComboBoxItem Content="Any Rating" Tag="All"/>
+                <ComboBoxItem Content="★ 9+ (Top)" Tag="9+"/>
+                <ComboBoxItem Content="★ 8+ (Great)" Tag="8+"/>
+                <ComboBoxItem Content="★ 7+ (Good)" Tag="7+"/>
+                <ComboBoxItem Content="Unrated" Tag="Unrated"/>
+              </ComboBox>
+            </StackPanel>
+
+            <!-- Playtime dropdown -->
+            <StackPanel Orientation="Horizontal" Spacing="4" VerticalAlignment="Center">
+              <TextBlock Text="Hours:" Foreground="#585b70" FontSize="11" VerticalAlignment="Center"/>
+              <ComboBox x:Name="PlaytimeFilterBox"
+                        Width="115"
+                        SelectedIndex="0"
+                        SelectionChanged="OnPlaytimeFilterChanged">
+                <ComboBoxItem Content="Any Hours" Tag="All"/>
+                <ComboBoxItem Content="Unplayed (0h)" Tag="Unplayed"/>
+                <ComboBoxItem Content="Quick (&lt;10h)" Tag="Under10h"/>
+                <ComboBoxItem Content="Medium (10-50h)" Tag="10-50h"/>
+                <ComboBoxItem Content="Epic (50h+)" Tag="50h+"/>
+              </ComboBox>
+            </StackPanel>
+
+            <!-- Search scope toggle -->
+            <CheckBox x:Name="SearchAllFieldsBox"
+                      Content="Deep Search (Notes, Pub, Dev)"
+                      FontSize="11"
+                      Foreground="#cdd6f4"
+                      VerticalAlignment="Center"
+                      Margin="8,0,0,0"
+                      IsCheckedChanged="OnSearchScopeChanged"/>
+          </StackPanel>
+
+          <!-- Clear filters row -->
+          <StackPanel Orientation="Horizontal" Spacing="8">
+            <Button Content="✕ Clear all filters"
+                    Classes="danger"
+                    Padding="10,4"
+                    FontSize="12"
+                    Click="OnClearFiltersClick"/>
+            <TextBlock x:Name="ActiveFilterCount"
+                       Foreground="#6c7086" FontSize="11"
+                       VerticalAlignment="Center"/>
+          </StackPanel>
+
+        </StackPanel>
+      </Border>
+
+    </StackPanel>
 
     <!-- ═══ GAME LIST ═════════════════════════════════════════════════════ -->
     <ListBox Grid.Row="2" Grid.Column="0"
@@ -368,6 +517,32 @@
                 </StackPanel>
               </Grid>
 
+              <!-- Publisher -->
+              <Grid ColumnDefinitions="22,*">
+                <Border Grid.Column="0" Background="#2a1e2a" CornerRadius="3" Width="18" Height="18"
+                        HorizontalAlignment="Center" VerticalAlignment="Center">
+                  <TextBlock Text="Pb" FontSize="8" FontWeight="Bold" Foreground="#f5c2e7"
+                             HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                </Border>
+                <StackPanel Grid.Column="1" Orientation="Horizontal" Spacing="6" VerticalAlignment="Center">
+                  <TextBlock Text="Publisher" Foreground="#6c7086" FontSize="11" FontWeight="Medium" VerticalAlignment="Center"/>
+                  <TextBlock Text="{Binding SelectedPublisher}" Foreground="#cdd6f4" FontSize="12" VerticalAlignment="Center"/>
+                </StackPanel>
+              </Grid>
+
+              <!-- Est. Length -->
+              <Grid ColumnDefinitions="22,*">
+                <Border Grid.Column="0" Background="#1e2f3a" CornerRadius="3" Width="18" Height="18"
+                        HorizontalAlignment="Center" VerticalAlignment="Center">
+                  <TextBlock Text="L" FontSize="9" FontWeight="Bold" Foreground="#89dceb"
+                             HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                </Border>
+                <StackPanel Grid.Column="1" Orientation="Horizontal" Spacing="6" VerticalAlignment="Center">
+                  <TextBlock Text="Est. Length" Foreground="#6c7086" FontSize="11" FontWeight="Medium" VerticalAlignment="Center"/>
+                  <TextBlock Text="{Binding SelectedCompletionEstimate}" Foreground="#cdd6f4" FontSize="12" VerticalAlignment="Center"/>
+                </StackPanel>
+              </Grid>
+
               <!-- Rating -->
               <Grid ColumnDefinitions="22,*">
                 <Border Grid.Column="0" Background="#3a3a1e" CornerRadius="3" Width="18" Height="18"
@@ -393,6 +568,20 @@
                   <TextBlock Text="{Binding SelectedReleaseYear}" Foreground="#cdd6f4" FontSize="12" VerticalAlignment="Center"/>
                 </StackPanel>
               </Grid>
+
+              <!-- Notes & Description -->
+              <StackPanel Spacing="6" Margin="0,10,0,0">
+                <TextBlock Text="DESCRIPTION / NOTES" FontSize="10" FontWeight="Bold"
+                           Foreground="#585b70" LetterSpacing="1"/>
+                <Border Background="#11111b" BorderBrush="#313244" BorderThickness="1"
+                        CornerRadius="6" Padding="10">
+                  <TextBlock Text="{Binding SelectedDescription}"
+                             Foreground="#cdd6f4"
+                             FontSize="11"
+                             LineHeight="16"
+                             TextWrapping="Wrap"/>
+                </Border>
+              </StackPanel>
 
             </StackPanel>
 

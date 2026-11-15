@@ -85,8 +85,21 @@ public sealed class CatalogueViewModel : ICatalogueViewModel
     /// <summary>When non-empty, only games whose Platform is in this set are shown.</summary>
     public HashSet<Platform> ActivePlatforms { get; } = new();
 
-    /// <summary>True when any status/platform filter is active.</summary>
-    public bool HasActiveFilters => ActiveStatuses.Count > 0 || ActivePlatforms.Count > 0;
+    public string SelectedGenreFilter { get; set; } = "All";
+    public string SelectedPriceFilter { get; set; } = "All";
+    public string SelectedRatingFilter { get; set; } = "All";
+    public string SelectedPlaytimeFilter { get; set; } = "All";
+    public bool SearchAllFields { get; set; } = false;
+
+    /// <summary>True when any status/platform or advanced filter is active.</summary>
+    public bool HasActiveFilters =>
+        ActiveStatuses.Count > 0 ||
+        ActivePlatforms.Count > 0 ||
+        (!string.IsNullOrEmpty(SelectedGenreFilter) && SelectedGenreFilter != "All") ||
+        (SelectedPriceFilter != "All") ||
+        (SelectedRatingFilter != "All") ||
+        (SelectedPlaytimeFilter != "All") ||
+        !string.IsNullOrEmpty(_filter);
 
     /// <summary>Toggles a status chip on/off and re-applies the filter.</summary>
     public void ToggleStatus(GameStatus status)
@@ -106,13 +119,130 @@ public sealed class CatalogueViewModel : ICatalogueViewModel
         ApplyFilter();
     }
 
-    /// <summary>Clears all status and platform filters.</summary>
+    public void SetGenreFilter(string? genre)
+    {
+        SelectedGenreFilter = string.IsNullOrWhiteSpace(genre) ? "All" : genre;
+        Notify(nameof(HasActiveFilters));
+        ApplyFilter();
+    }
+
+    public void SetPriceFilter(string filter)
+    {
+        SelectedPriceFilter = filter;
+        Notify(nameof(HasActiveFilters));
+        ApplyFilter();
+    }
+
+    public void SetRatingFilter(string filter)
+    {
+        SelectedRatingFilter = filter;
+        Notify(nameof(HasActiveFilters));
+        ApplyFilter();
+    }
+
+    public void SetPlaytimeFilter(string filter)
+    {
+        SelectedPlaytimeFilter = filter;
+        Notify(nameof(HasActiveFilters));
+        ApplyFilter();
+    }
+
+    public void SetSearchAllFields(bool searchAll)
+    {
+        SearchAllFields = searchAll;
+        ApplyFilter();
+    }
+
+    public IReadOnlyList<string> GetDistinctGenres()
+    {
+        var genres = _store.All()
+            .OfType<BaseTrackableGame>()
+            .Select(g => g.Genre?.Trim())
+            .Where(g => !string.IsNullOrEmpty(g))
+            .Distinct(StringComparer.OrdinalIgnoreCase)
+            .OrderBy(g => g)
+            .ToList();
+
+        var list = new List<string> { "All" };
+        list.AddRange(genres!);
+        return list;
+    }
+
+    /// <summary>Clears all status and platform and advanced filters.</summary>
     public void ClearFilters()
     {
         ActiveStatuses.Clear();
         ActivePlatforms.Clear();
+        SelectedGenreFilter = "All";
+        SelectedPriceFilter = "All";
+        SelectedRatingFilter = "All";
+        SelectedPlaytimeFilter = "All";
+        _filter = string.Empty;
+        Notify(nameof(Filter));
         Notify(nameof(HasActiveFilters));
         ApplyFilter();
+    }
+
+    // ── Sorting ───────────────────────────────────────────────────────────────
+
+    public GameSortField CurrentSortField { get; private set; } = GameSortField.Default;
+    public SortDirection CurrentSortDirection { get; private set; } = SortDirection.Ascending;
+    public bool IsSorted => CurrentSortField != GameSortField.Default;
+
+    public string CurrentSortDescription => CurrentSortField switch
+    {
+        GameSortField.Default              => "Default (Store Order)",
+        GameSortField.Title                => CurrentSortDirection == SortDirection.Ascending ? "Title (A → Z)" : "Title (Z → A)",
+        GameSortField.HoursPlayed          => CurrentSortDirection == SortDirection.Ascending ? "Hours (Lowest)" : "Hours (Highest)",
+        GameSortField.Rating               => CurrentSortDirection == SortDirection.Ascending ? "Rating (Lowest)" : "Rating (Highest)",
+        GameSortField.Price                => CurrentSortDirection == SortDirection.Ascending ? "Price (Lowest)" : "Price (Highest)",
+        GameSortField.ReleaseYear          => CurrentSortDirection == SortDirection.Ascending ? "Year (Oldest)" : "Year (Newest)",
+        GameSortField.AverageCompleteHours => CurrentSortDirection == SortDirection.Ascending ? "Est. Length (Shortest)" : "Est. Length (Longest)",
+        _                                  => "Default"
+    };
+
+    public void SetSort(GameSortField field, SortDirection? direction = null)
+    {
+        if (field == CurrentSortField && direction is null)
+        {
+            CurrentSortDirection = CurrentSortDirection == SortDirection.Ascending
+                ? SortDirection.Descending
+                : SortDirection.Ascending;
+        }
+        else
+        {
+            CurrentSortField = field;
+            CurrentSortDirection = direction ?? (field is GameSortField.Rating or GameSortField.HoursPlayed or GameSortField.ReleaseYear
+                ? SortDirection.Descending
+                : SortDirection.Ascending);
+        }
+
+        ApplyFilter();
+        Notify(nameof(CurrentSortField));
+        Notify(nameof(CurrentSortDirection));
+        Notify(nameof(CurrentSortDescription));
+        Notify(nameof(IsSorted));
+    }
+
+    public void ToggleSortDirection()
+    {
+        CurrentSortDirection = CurrentSortDirection == SortDirection.Ascending
+            ? SortDirection.Descending
+            : SortDirection.Ascending;
+        ApplyFilter();
+        Notify(nameof(CurrentSortDirection));
+        Notify(nameof(CurrentSortDescription));
+    }
+
+    public void ResetSort()
+    {
+        CurrentSortField = GameSortField.Default;
+        CurrentSortDirection = SortDirection.Ascending;
+        ApplyFilter();
+        Notify(nameof(CurrentSortField));
+        Notify(nameof(CurrentSortDirection));
+        Notify(nameof(CurrentSortDescription));
+        Notify(nameof(IsSorted));
     }
 
     private IItem? _selected;
@@ -133,8 +263,11 @@ public sealed class CatalogueViewModel : ICatalogueViewModel
             Notify(nameof(SelectedPrice));
             Notify(nameof(SelectedGenre));
             Notify(nameof(SelectedDeveloper));
+            Notify(nameof(SelectedPublisher));
+            Notify(nameof(SelectedCompletionEstimate));
             Notify(nameof(SelectedRating));
             Notify(nameof(SelectedReleaseYear));
+            Notify(nameof(SelectedDescription));
             ((RelayCommand)RemoveCommand).RaiseCanExecuteChanged();
         }
     }
@@ -151,14 +284,17 @@ public sealed class CatalogueViewModel : ICatalogueViewModel
 
     private BaseTrackableGame? Game => _selected as BaseTrackableGame;
 
-    public string SelectedPlatform    => Game?.Platform.ToString() ?? "—";
-    public string SelectedStatus      => Game?.Status.ToString()   ?? "—";
-    public string SelectedHours       => Game is { } g ? $"{g.HoursPlayed:F0} h" : "—";
-    public string SelectedPrice       => Game is { Price: { } p } ? $"€{p:F2}" : Game is not null ? "Free" : "—";
-    public string SelectedGenre       => Game?.Genre ?? "—";
-    public string SelectedDeveloper   => Game?.Developer.Name ?? "—";
-    public string SelectedRating      => Game?.Rating?.ToString() ?? "Not rated";
-    public string SelectedReleaseYear => Game?.ReleaseYear?.ToString() ?? "—";
+    public string SelectedPlatform           => Game?.Platform.ToString() ?? "—";
+    public string SelectedStatus             => Game?.Status.ToString()   ?? "—";
+    public string SelectedHours              => Game is { } g ? $"{g.HoursPlayed:F0} h" : "—";
+    public string SelectedPrice              => Game is { Price: { } p } ? $"€{p:F2}" : Game is not null ? "Free" : "—";
+    public string SelectedGenre              => Game?.Genre ?? "—";
+    public string SelectedDeveloper          => Game?.Developer.Name ?? "—";
+    public string SelectedPublisher          => !string.IsNullOrWhiteSpace(Game?.Publisher) ? Game.Publisher : "—";
+    public string SelectedCompletionEstimate => Game is { AverageCompleteHours: { } h } ? $"{h:F0} h" : "—";
+    public string SelectedRating             => Game?.Rating?.ToString() ?? "Not rated";
+    public string SelectedReleaseYear        => Game?.ReleaseYear?.ToString() ?? "—";
+    public string SelectedDescription        => !string.IsNullOrWhiteSpace(Game?.Description) ? Game.Description : "No description or notes.";
 
     /// <inheritdoc/>
     public int Count => _items.Count;
@@ -178,21 +314,25 @@ public sealed class CatalogueViewModel : ICatalogueViewModel
     public void UpdateGame(BaseTrackableGame game,
                            string title, Platform platform, GameStatus status,
                            string? genre, string developer,
-                           double hoursPlayed, decimal? price, int? releaseYear, int? rating)
+                           double hoursPlayed, decimal? price, int? releaseYear, int? rating,
+                           string? publisher = null, double? averageCompleteHours = null, string? description = null)
     {
         // BaseTrackableGame uses init-only setters for most fields, but the
-        // mutable ones (Status, HoursPlayed, Rating) can be set directly.
+        // mutable ones (Status, HoursPlayed, Rating, Publisher, AverageCompleteHours, Description) can be set directly.
         // For init-only fields we update via reflection so the Core API stays clean.
-        SetProp(game, nameof(game.Status),      status);
-        SetProp(game, nameof(game.HoursPlayed), hoursPlayed);
-        SetProp(game, nameof(game.Rating),      rating);
+        SetProp(game, nameof(game.Status),               status);
+        SetProp(game, nameof(game.HoursPlayed),          hoursPlayed);
+        SetProp(game, nameof(game.Rating),               rating);
+        SetProp(game, nameof(game.Publisher),            publisher);
+        SetProp(game, nameof(game.AverageCompleteHours), averageCompleteHours);
+        SetProp(game, nameof(game.Description),          description);
 
         // These are init-only — use reflection to mutate in-place.
-        SetInit(game, nameof(game.Title),       title);
-        SetInit(game, nameof(game.Platform),    platform);
-        SetInit(game, nameof(game.Genre),       genre);
-        SetInit(game, nameof(game.Price),       price);
-        SetInit(game, nameof(game.ReleaseYear), releaseYear);
+        SetInit(game, nameof(game.Title),                title);
+        SetInit(game, nameof(game.Platform),             platform);
+        SetInit(game, nameof(game.Genre),                genre);
+        SetInit(game, nameof(game.Price),                price);
+        SetInit(game, nameof(game.ReleaseYear),          releaseYear);
         SetInit(game, "Developer",
             new Capstone.Core.Models.Developer { Name = developer });
 
@@ -204,8 +344,11 @@ public sealed class CatalogueViewModel : ICatalogueViewModel
         Notify(nameof(SelectedPrice));
         Notify(nameof(SelectedGenre));
         Notify(nameof(SelectedDeveloper));
+        Notify(nameof(SelectedPublisher));
+        Notify(nameof(SelectedCompletionEstimate));
         Notify(nameof(SelectedRating));
         Notify(nameof(SelectedReleaseYear));
+        Notify(nameof(SelectedDescription));
 
         // Persist the changes.
         _repo?.Update(game);
@@ -272,17 +415,99 @@ public sealed class CatalogueViewModel : ICatalogueViewModel
     private bool Matches(IItem item)
     {
         // Text search
-        if (!string.IsNullOrEmpty(_filter) &&
-            !item.DisplayName.Contains(_filter, StringComparison.OrdinalIgnoreCase))
-            return false;
+        if (!string.IsNullOrEmpty(_filter))
+        {
+            if (SearchAllFields && item is BaseTrackableGame bg)
+            {
+                bool matchesAny =
+                    item.DisplayName.Contains(_filter, StringComparison.OrdinalIgnoreCase) ||
+                    (!string.IsNullOrEmpty(bg.Genre) && bg.Genre.Contains(_filter, StringComparison.OrdinalIgnoreCase)) ||
+                    (!string.IsNullOrEmpty(bg.Developer.Name) && bg.Developer.Name.Contains(_filter, StringComparison.OrdinalIgnoreCase)) ||
+                    (!string.IsNullOrEmpty(bg.Publisher) && bg.Publisher.Contains(_filter, StringComparison.OrdinalIgnoreCase)) ||
+                    (!string.IsNullOrEmpty(bg.Description) && bg.Description.Contains(_filter, StringComparison.OrdinalIgnoreCase));
 
-        // Status / platform chips (only applied to trackable games)
+                if (!matchesAny) return false;
+            }
+            else
+            {
+                if (!item.DisplayName.Contains(_filter, StringComparison.OrdinalIgnoreCase))
+                    return false;
+            }
+        }
+
+        // Status / platform chips and advanced filters (only applied to trackable games)
         if (item is BaseTrackableGame g)
         {
             if (ActiveStatuses.Count > 0 && !ActiveStatuses.Contains(g.Status))
                 return false;
             if (ActivePlatforms.Count > 0 && !ActivePlatforms.Contains(g.Platform))
                 return false;
+
+            if (!string.IsNullOrWhiteSpace(SelectedGenreFilter) && SelectedGenreFilter != "All")
+            {
+                if (!string.Equals(g.Genre, SelectedGenreFilter, StringComparison.OrdinalIgnoreCase))
+                    return false;
+            }
+
+            if (SelectedPriceFilter != "All")
+            {
+                switch (SelectedPriceFilter)
+                {
+                    case "Free":
+                        if (g.Price is { } p && p > 0) return false;
+                        break;
+                    case "Paid":
+                        if (g.Price is null or <= 0) return false;
+                        break;
+                    case "<20":
+                    case "Under20":
+                        if (g.Price is null or > 20) return false;
+                        break;
+                    case "<50":
+                    case "Under50":
+                        if (g.Price is null or > 50) return false;
+                        break;
+                }
+            }
+
+            if (SelectedRatingFilter != "All")
+            {
+                switch (SelectedRatingFilter)
+                {
+                    case "9+":
+                        if (g.Rating is null or < 9) return false;
+                        break;
+                    case "8+":
+                        if (g.Rating is null or < 8) return false;
+                        break;
+                    case "7+":
+                        if (g.Rating is null or < 7) return false;
+                        break;
+                    case "Unrated":
+                        if (g.Rating.HasValue) return false;
+                        break;
+                }
+            }
+
+            if (SelectedPlaytimeFilter != "All")
+            {
+                switch (SelectedPlaytimeFilter)
+                {
+                    case "Unplayed":
+                        if (g.HoursPlayed > 0) return false;
+                        break;
+                    case "<10h":
+                    case "Under10h":
+                        if (g.HoursPlayed >= 10) return false;
+                        break;
+                    case "10-50h":
+                        if (g.HoursPlayed < 10 || g.HoursPlayed > 50) return false;
+                        break;
+                    case "50h+":
+                        if (g.HoursPlayed < 50) return false;
+                        break;
+                }
+            }
         }
 
         return true;
@@ -290,35 +515,104 @@ public sealed class CatalogueViewModel : ICatalogueViewModel
 
     private void ApplyFilter()
     {
-        // Rebuild the visible set by surgically adding/removing items — no Clear/Reset.
         var allItems = _store.All();
+        var matched = allItems.Where(Matches);
+
+        IEnumerable<IItem> sorted = CurrentSortField switch
+        {
+            GameSortField.Title => CurrentSortDirection == SortDirection.Ascending
+                ? matched.OrderBy(i => i.DisplayName, StringComparer.OrdinalIgnoreCase)
+                : matched.OrderByDescending(i => i.DisplayName, StringComparer.OrdinalIgnoreCase),
+
+            GameSortField.HoursPlayed => CurrentSortDirection == SortDirection.Ascending
+                ? matched.OrderBy(i => (i as BaseTrackableGame)?.HoursPlayed ?? 0)
+                : matched.OrderByDescending(i => (i as BaseTrackableGame)?.HoursPlayed ?? 0),
+
+            GameSortField.Rating => CurrentSortDirection == SortDirection.Ascending
+                ? matched.OrderBy(i => (i as BaseTrackableGame)?.Rating.HasValue != true)
+                         .ThenBy(i => (i as BaseTrackableGame)?.Rating)
+                : matched.OrderBy(i => (i as BaseTrackableGame)?.Rating.HasValue != true)
+                         .ThenByDescending(i => (i as BaseTrackableGame)?.Rating),
+
+            GameSortField.Price => CurrentSortDirection == SortDirection.Ascending
+                ? matched.OrderBy(i => (i as BaseTrackableGame)?.Price ?? 0m)
+                : matched.OrderByDescending(i => (i as BaseTrackableGame)?.Price ?? 0m),
+
+            GameSortField.ReleaseYear => CurrentSortDirection == SortDirection.Ascending
+                ? matched.OrderBy(i => (i as BaseTrackableGame)?.ReleaseYear.HasValue != true)
+                         .ThenBy(i => (i as BaseTrackableGame)?.ReleaseYear)
+                : matched.OrderBy(i => (i as BaseTrackableGame)?.ReleaseYear.HasValue != true)
+                         .ThenByDescending(i => (i as BaseTrackableGame)?.ReleaseYear),
+
+            GameSortField.AverageCompleteHours => CurrentSortDirection == SortDirection.Ascending
+                ? matched.OrderBy(i => (i as BaseTrackableGame)?.AverageCompleteHours.HasValue != true)
+                         .ThenBy(i => (i as BaseTrackableGame)?.AverageCompleteHours)
+                : matched.OrderBy(i => (i as BaseTrackableGame)?.AverageCompleteHours.HasValue != true)
+                         .ThenByDescending(i => (i as BaseTrackableGame)?.AverageCompleteHours),
+
+            _ => matched
+        };
+
+        var targetList = sorted.ToList();
+        var targetSet = new HashSet<string>(targetList.Select(x => x.Id));
 
         // Remove items that no longer match (iterate backwards for safe removal).
         for (int i = _items.Count - 1; i >= 0; i--)
         {
-            if (!Matches(_items[i]))
+            if (!targetSet.Contains(_items[i].Id))
                 _items.RemoveAt(i);
         }
 
-        // Add items that now match but aren't visible yet, maintaining store order.
-        int insertPos = 0;
-        foreach (var item in allItems)
+        // Align _items with targetList
+        for (int i = 0; i < targetList.Count; i++)
         {
-            if (!Matches(item)) continue;
-
-            if (insertPos < _items.Count && _items[insertPos].Id == item.Id)
+            var target = targetList[i];
+            if (i < _items.Count && _items[i].Id == target.Id)
             {
-                insertPos++;
+                continue;
+            }
+
+            int existingIdx = -1;
+            for (int j = i + 1; j < _items.Count; j++)
+            {
+                if (_items[j].Id == target.Id)
+                {
+                    existingIdx = j;
+                    break;
+                }
+            }
+
+            if (existingIdx >= 0)
+            {
+                _items.Move(existingIdx, i);
             }
             else
             {
-                _items.Insert(insertPos, item);
-                insertPos++;
+                _items.Insert(i, target);
             }
         }
 
         Notify(nameof(Count));
     }
+}
+
+// ── Sorting enums ─────────────────────────────────────────────────────────────
+
+public enum GameSortField
+{
+    Default,
+    Title,
+    HoursPlayed,
+    Rating,
+    Price,
+    ReleaseYear,
+    AverageCompleteHours
+}
+
+public enum SortDirection
+{
+    Ascending,
+    Descending
 }
 
 // ── RelayCommand ──────────────────────────────────────────────────────────────

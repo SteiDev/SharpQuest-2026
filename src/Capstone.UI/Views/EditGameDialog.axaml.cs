@@ -27,13 +27,16 @@ public partial class EditGameDialog : Window
         StatusBox.ItemsSource    = Enum.GetValues<GameStatus>();
 
         // Pre-fill all fields with the current values
-        TitleBox.Text    = game.Title;
-        GenreBox.Text    = game.Genre ?? string.Empty;
-        DevBox.Text      = game.Developer.Name;
-        HoursBox.Text    = game.HoursPlayed.ToString("F0");
-        RatingBox.Text   = game.Rating?.ToString() ?? string.Empty;
-        PriceBox.Text    = game.Price?.ToString("F2") ?? string.Empty;
-        YearBox.Text     = game.ReleaseYear?.ToString() ?? string.Empty;
+        TitleBox.Text         = game.Title;
+        GenreBox.Text         = game.Genre ?? string.Empty;
+        DevBox.Text           = game.Developer.Name;
+        PublisherBox.Text     = game.Publisher ?? string.Empty;
+        CompleteHoursBox.Text = game.AverageCompleteHours?.ToString("F0") ?? string.Empty;
+        HoursBox.Text         = game.HoursPlayed.ToString("F0");
+        RatingBox.Text        = game.Rating?.ToString() ?? string.Empty;
+        PriceBox.Text         = game.Price?.ToString("F2") ?? string.Empty;
+        YearBox.Text          = game.ReleaseYear?.ToString() ?? string.Empty;
+        DescriptionBox.Text   = game.Description ?? string.Empty;
 
         PlatformBox.SelectedItem = game.Platform;
         StatusBox.SelectedItem   = game.Status;
@@ -89,20 +92,34 @@ public partial class EditGameDialog : Window
             rating = r;
         }
 
+        double? completeHours = null;
+        if (!string.IsNullOrWhiteSpace(CompleteHoursBox.Text))
+        {
+            if (!double.TryParse(CompleteHoursBox.Text, out var ch) || ch < 0)
+            {
+                ShowError("Estimated completion hours must be a non-negative number.");
+                return;
+            }
+            completeHours = ch;
+        }
+
         var platform = PlatformBox.SelectedItem is Platform p2 ? p2 : _game.Platform;
         var status   = StatusBox.SelectedItem   is GameStatus s ? s : _game.Status;
 
         // Build an edit result record and return it
         Close(new EditResult(
-            Title:       title,
-            Platform:    platform,
-            Status:      status,
-            Genre:       string.IsNullOrWhiteSpace(GenreBox.Text) ? null : GenreBox.Text.Trim(),
-            Developer:   DevBox.Text?.Trim() ?? string.Empty,
-            HoursPlayed: hours,
-            Price:       price,
-            ReleaseYear: year,
-            Rating:      rating
+            Title:                title,
+            Platform:             platform,
+            Status:               status,
+            Genre:                string.IsNullOrWhiteSpace(GenreBox.Text) ? null : GenreBox.Text.Trim(),
+            Developer:            DevBox.Text?.Trim() ?? string.Empty,
+            HoursPlayed:          hours,
+            Price:                price,
+            ReleaseYear:          year,
+            Rating:               rating,
+            Publisher:            string.IsNullOrWhiteSpace(PublisherBox.Text) ? null : PublisherBox.Text.Trim(),
+            AverageCompleteHours: completeHours,
+            Description:          string.IsNullOrWhiteSpace(DescriptionBox.Text) ? null : DescriptionBox.Text.Trim()
         ));
     }
 
@@ -115,12 +132,15 @@ public partial class EditGameDialog : Window
 
 /// <summary>Plain data record carrying the validated edits back to the caller.</summary>
 public sealed record EditResult(
-    string    Title,
-    Platform  Platform,
+    string     Title,
+    Platform   Platform,
     GameStatus Status,
-    string?   Genre,
-    string    Developer,
-    double    HoursPlayed,
-    decimal?  Price,
-    int?      ReleaseYear,
-    int?      Rating);
+    string?    Genre,
+    string     Developer,
+    double     HoursPlayed,
+    decimal?   Price,
+    int?       ReleaseYear,
+    int?       Rating,
+    string?    Publisher = null,
+    double?    AverageCompleteHours = null,
+    string?    Description = null);
