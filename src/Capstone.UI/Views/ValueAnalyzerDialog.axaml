@@ -274,9 +274,12 @@
                       Margin="20">
             <Border Background="#313244" CornerRadius="12"
                     Width="56" Height="56" HorizontalAlignment="Center">
-              <TextBlock Text="📊" FontSize="24"
-                         HorizontalAlignment="Center"
-                         VerticalAlignment="Center"/>
+              <Path Data="M5,9.2 L7.8,9.2 L7.8,19 L5,19 L5,9.2 Z M10.6,5 L13.4,5 L13.4,19 L10.6,19 L10.6,5 Z M16.2,13 L19,13 L19,19 L16.2,19 L16.2,13 Z"
+                    Fill="#cba6f7"
+                    Width="24" Height="24"
+                    Stretch="Uniform"
+                    HorizontalAlignment="Center"
+                    VerticalAlignment="Center"/>
             </Border>
             <TextBlock Text="No Chart Data Available"
                        FontSize="15" FontWeight="SemiBold"
