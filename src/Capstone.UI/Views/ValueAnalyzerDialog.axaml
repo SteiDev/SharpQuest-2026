@@ -15,20 +15,31 @@
             Background="#11111b"
             BorderBrush="#313244" BorderThickness="0,0,0,1"
             Padding="20,14">
-      <StackPanel Orientation="Horizontal" Spacing="10">
-        <Border Background="#f9e2af" CornerRadius="6"
-                Width="30" Height="30" VerticalAlignment="Center">
-          <TextBlock Text="€" FontSize="16" FontWeight="Bold"
-                     Foreground="#1e1e2e"
-                     HorizontalAlignment="Center"
-                     VerticalAlignment="Center"/>
-        </Border>
-        <StackPanel Spacing="2">
-          <TextBlock Text="Value Analyzer" FontSize="15" FontWeight="Bold" Foreground="#cdd6f4"/>
-          <TextBlock Text="Cost per hour and backlog estimates for every tracked game"
-                     FontSize="11" Foreground="#585b70"/>
+      <Grid ColumnDefinitions="*,Auto">
+        <StackPanel Grid.Column="0" Orientation="Horizontal" Spacing="10">
+          <Border Background="#f9e2af" CornerRadius="6"
+                  Width="30" Height="30" VerticalAlignment="Center">
+            <TextBlock Text="€" FontSize="16" FontWeight="Bold"
+                       Foreground="#1e1e2e"
+                       HorizontalAlignment="Center"
+                       VerticalAlignment="Center"/>
+          </Border>
+          <StackPanel Spacing="2">
+            <TextBlock Text="Value Analyzer" FontSize="15" FontWeight="Bold" Foreground="#cdd6f4"/>
+            <TextBlock Text="Cost per hour and backlog estimates for every tracked game"
+                       FontSize="11" Foreground="#585b70"/>
+          </StackPanel>
         </StackPanel>
-      </StackPanel>
+
+        <!-- Toggle View Button in Header -->
+        <Button Grid.Column="1"
+                x:Name="ViewToggleBtn"
+                Content="📊 View Chart"
+                Classes="accent"
+                VerticalAlignment="Center"
+                Click="OnToggleChartClick"
+                ToolTip.Tip="Generate and toggle value-per-hour chart view"/>
+      </Grid>
     </Border>
 
     <!-- ── Summary strip ──────────────────────────────────────────────────── -->
@@ -76,136 +87,255 @@
       </StackPanel>
     </Border>
 
-    <!-- ── Table ──────────────────────────────────────────────────────────── -->
-    <Grid Grid.Row="2" RowDefinitions="Auto,*">
+    <!-- ── Content (Table or Chart) ───────────────────────────────────────── -->
+    <Grid Grid.Row="2">
 
-      <!-- Column headers -->
-      <Border Grid.Row="0"
-              Background="#11111b"
-              BorderBrush="#313244" BorderThickness="0,0,0,1"
-              Padding="8,4">
-        <Grid ColumnDefinitions="*,90,80,90,100,90">
+      <!-- Table View -->
+      <Grid x:Name="TableView" RowDefinitions="Auto,*" IsVisible="True">
 
-          <!-- GAME -->
-          <Button Grid.Column="0" Classes="colhdr" Tag="Game"
-                  HorizontalAlignment="Left" Click="OnColumnHeaderClick">
-            <StackPanel Orientation="Horizontal" Spacing="4">
-              <TextBlock Text="GAME" FontSize="10" FontWeight="Bold" LetterSpacing="1"/>
-              <TextBlock x:Name="SortGame" FontSize="10" FontWeight="Bold" Foreground="#cba6f7"/>
+        <!-- Column headers -->
+        <Border Grid.Row="0"
+                Background="#11111b"
+                BorderBrush="#313244" BorderThickness="0,0,0,1"
+                Padding="8,4">
+          <Grid ColumnDefinitions="*,90,80,90,100,90">
+
+            <!-- GAME -->
+            <Button Grid.Column="0" Classes="colhdr" Tag="Game"
+                    HorizontalAlignment="Left" Click="OnColumnHeaderClick">
+              <StackPanel Orientation="Horizontal" Spacing="4">
+                <TextBlock Text="GAME" FontSize="10" FontWeight="Bold" LetterSpacing="1"/>
+                <TextBlock x:Name="SortGame" FontSize="10" FontWeight="Bold" Foreground="#cba6f7"/>
+              </StackPanel>
+            </Button>
+
+            <!-- STATUS -->
+            <Button Grid.Column="1" Classes="colhdr" Tag="Status"
+                    HorizontalAlignment="Center" Click="OnColumnHeaderClick">
+              <StackPanel Orientation="Horizontal" Spacing="4">
+                <TextBlock Text="STATUS" FontSize="10" FontWeight="Bold" LetterSpacing="1"/>
+                <TextBlock x:Name="SortStatus" FontSize="10" FontWeight="Bold" Foreground="#cba6f7"/>
+              </StackPanel>
+            </Button>
+
+            <!-- HOURS -->
+            <Button Grid.Column="2" Classes="colhdr" Tag="Hours"
+                    HorizontalAlignment="Right" Click="OnColumnHeaderClick">
+              <StackPanel Orientation="Horizontal" Spacing="4">
+                <TextBlock Text="HOURS" FontSize="10" FontWeight="Bold" LetterSpacing="1"/>
+                <TextBlock x:Name="SortHours" FontSize="10" FontWeight="Bold" Foreground="#cba6f7"/>
+              </StackPanel>
+            </Button>
+
+            <!-- PRICE -->
+            <Button Grid.Column="3" Classes="colhdr" Tag="Price"
+                    HorizontalAlignment="Right" Click="OnColumnHeaderClick">
+              <StackPanel Orientation="Horizontal" Spacing="4">
+                <TextBlock Text="PRICE" FontSize="10" FontWeight="Bold" LetterSpacing="1"/>
+                <TextBlock x:Name="SortPrice" FontSize="10" FontWeight="Bold" Foreground="#cba6f7"/>
+              </StackPanel>
+            </Button>
+
+            <!-- COST / HR -->
+            <Button Grid.Column="4" Classes="colhdr" Tag="CostPerHour"
+                    HorizontalAlignment="Right" Click="OnColumnHeaderClick">
+              <StackPanel Orientation="Horizontal" Spacing="4">
+                <TextBlock Text="COST / HR" FontSize="10" FontWeight="Bold" LetterSpacing="1"/>
+                <TextBlock x:Name="SortCostPerHour" FontSize="10" FontWeight="Bold" Foreground="#cba6f7"/>
+              </StackPanel>
+            </Button>
+
+            <!-- BACKLOG HRS -->
+            <Button Grid.Column="5" Classes="colhdr" Tag="BacklogHrs"
+                    HorizontalAlignment="Right" Click="OnColumnHeaderClick">
+              <StackPanel Orientation="Horizontal" Spacing="4">
+                <TextBlock Text="BACKLOG HRS" FontSize="10" FontWeight="Bold" LetterSpacing="1"/>
+                <TextBlock x:Name="SortBacklogHrs" FontSize="10" FontWeight="Bold" Foreground="#cba6f7"/>
+              </StackPanel>
+            </Button>
+
+          </Grid>
+        </Border>
+
+        <!-- Rows -->
+        <ScrollViewer Grid.Row="1">
+          <ItemsControl x:Name="GameRows" Padding="0,4">
+            <ItemsControl.ItemTemplate>
+              <DataTemplate x:DataType="local:AnalyzerRow">
+                <Border BorderBrush="#313244" BorderThickness="0,0,0,1"
+                        Padding="16,10">
+                  <Grid ColumnDefinitions="*,90,80,90,100,90">
+
+                    <!-- Title + Platform -->
+                    <StackPanel Grid.Column="0" Spacing="2">
+                      <TextBlock Text="{Binding Title}"
+                                 FontWeight="SemiBold" FontSize="13"/>
+                      <TextBlock Text="{Binding Platform}"
+                                 FontSize="11" Foreground="#6c7086"/>
+                    </StackPanel>
+
+                    <!-- Status pill -->
+                    <Border Grid.Column="1"
+                            CornerRadius="10" Padding="8,3"
+                            HorizontalAlignment="Center" VerticalAlignment="Center"
+                            Background="{Binding StatusBackground}">
+                      <TextBlock Text="{Binding Status}"
+                                 FontSize="11" FontWeight="Medium"
+                                 Foreground="{Binding StatusForeground}"
+                                 HorizontalAlignment="Center"/>
+                    </Border>
+
+                    <!-- Hours played -->
+                    <TextBlock Grid.Column="2"
+                               Text="{Binding HoursPlayed}"
+                               Foreground="#cdd6f4" FontSize="13"
+                               HorizontalAlignment="Right"
+                               VerticalAlignment="Center"/>
+
+                    <!-- Price -->
+                    <TextBlock Grid.Column="3"
+                               Text="{Binding Price}"
+                               Foreground="#cdd6f4" FontSize="13"
+                               HorizontalAlignment="Right"
+                               VerticalAlignment="Center"/>
+
+                    <!-- Cost per hour (colour-coded) -->
+                    <TextBlock Grid.Column="4"
+                               Text="{Binding CostPerHour}"
+                               Foreground="{Binding CostColour}"
+                               FontSize="13" FontWeight="SemiBold"
+                               HorizontalAlignment="Right"
+                               VerticalAlignment="Center"/>
+
+                    <!-- Backlog hours remaining -->
+                    <TextBlock Grid.Column="5"
+                               Text="{Binding BacklogRemaining}"
+                               Foreground="#cba6f7" FontSize="13"
+                               HorizontalAlignment="Right"
+                               VerticalAlignment="Center"/>
+
+                  </Grid>
+                </Border>
+              </DataTemplate>
+            </ItemsControl.ItemTemplate>
+          </ItemsControl>
+        </ScrollViewer>
+
+      </Grid>
+
+      <!-- Chart View -->
+      <Grid x:Name="ChartView" RowDefinitions="Auto,*" IsVisible="False">
+        <!-- Chart Controls & Legend Header -->
+        <Border Grid.Row="0"
+                Background="#11111b"
+                BorderBrush="#313244" BorderThickness="0,0,0,1"
+                Padding="16,8">
+          <Grid ColumnDefinitions="*,Auto">
+            <!-- Legend -->
+            <StackPanel Grid.Column="0" Orientation="Horizontal" Spacing="16" VerticalAlignment="Center">
+              <StackPanel Orientation="Horizontal" Spacing="6" VerticalAlignment="Center">
+                <Border Width="10" Height="10" CornerRadius="2" Background="#a6e3a1"/>
+                <TextBlock Text="≤ €0.50/h Great value" FontSize="11" Foreground="#a6adc8"/>
+              </StackPanel>
+              <StackPanel Orientation="Horizontal" Spacing="6" VerticalAlignment="Center">
+                <Border Width="10" Height="10" CornerRadius="2" Background="#f9e2af"/>
+                <TextBlock Text="≤ €1.50/h Good value" FontSize="11" Foreground="#a6adc8"/>
+              </StackPanel>
+              <StackPanel Orientation="Horizontal" Spacing="6" VerticalAlignment="Center">
+                <Border Width="10" Height="10" CornerRadius="2" Background="#f38ba8"/>
+                <TextBlock Text="> €1.50/h Higher cost" FontSize="11" Foreground="#a6adc8"/>
+              </StackPanel>
             </StackPanel>
-          </Button>
 
-          <!-- STATUS -->
-          <Button Grid.Column="1" Classes="colhdr" Tag="Status"
-                  HorizontalAlignment="Center" Click="OnColumnHeaderClick">
-            <StackPanel Orientation="Horizontal" Spacing="4">
-              <TextBlock Text="STATUS" FontSize="10" FontWeight="Bold" LetterSpacing="1"/>
-              <TextBlock x:Name="SortStatus" FontSize="10" FontWeight="Bold" Foreground="#cba6f7"/>
+            <!-- Chart Sorting buttons -->
+            <StackPanel Grid.Column="1" Orientation="Horizontal" Spacing="6">
+              <Button x:Name="SortBestValueBtn"
+                      Content="Best Value ▲"
+                      Classes="chip active"
+                      Padding="10,4" FontSize="11"
+                      Click="OnSortChartBestValueClick"/>
+              <Button x:Name="SortHighestCostBtn"
+                      Content="Highest Cost ▼"
+                      Classes="chip"
+                      Padding="10,4" FontSize="11"
+                      Click="OnSortChartHighestCostClick"/>
             </StackPanel>
-          </Button>
+          </Grid>
+        </Border>
 
-          <!-- HOURS -->
-          <Button Grid.Column="2" Classes="colhdr" Tag="Hours"
-                  HorizontalAlignment="Right" Click="OnColumnHeaderClick">
-            <StackPanel Orientation="Horizontal" Spacing="4">
-              <TextBlock Text="HOURS" FontSize="10" FontWeight="Bold" LetterSpacing="1"/>
-              <TextBlock x:Name="SortHours" FontSize="10" FontWeight="Bold" Foreground="#cba6f7"/>
-            </StackPanel>
-          </Button>
+        <!-- Chart List or Empty State -->
+        <Grid Grid.Row="1">
+          <!-- Empty State -->
+          <StackPanel x:Name="ChartEmptyState"
+                      IsVisible="False"
+                      HorizontalAlignment="Center"
+                      VerticalAlignment="Center"
+                      Spacing="10"
+                      Margin="20">
+            <Border Background="#313244" CornerRadius="12"
+                    Width="56" Height="56" HorizontalAlignment="Center">
+              <TextBlock Text="📊" FontSize="24"
+                         HorizontalAlignment="Center"
+                         VerticalAlignment="Center"/>
+            </Border>
+            <TextBlock Text="No Chart Data Available"
+                       FontSize="15" FontWeight="SemiBold"
+                       Foreground="#cdd6f4"
+                       HorizontalAlignment="Center"/>
+            <TextBlock Text="No games have both hours played and price set yet. Add price and hours to generate value/hr."
+                       FontSize="12"
+                       Foreground="#6c7086"
+                       HorizontalAlignment="Center"/>
+          </StackPanel>
 
-          <!-- PRICE -->
-          <Button Grid.Column="3" Classes="colhdr" Tag="Price"
-                  HorizontalAlignment="Right" Click="OnColumnHeaderClick">
-            <StackPanel Orientation="Horizontal" Spacing="4">
-              <TextBlock Text="PRICE" FontSize="10" FontWeight="Bold" LetterSpacing="1"/>
-              <TextBlock x:Name="SortPrice" FontSize="10" FontWeight="Bold" Foreground="#cba6f7"/>
-            </StackPanel>
-          </Button>
+          <!-- Chart ScrollViewer -->
+          <ScrollViewer x:Name="ChartScrollViewer" Padding="12,6">
+            <ItemsControl x:Name="ChartRows">
+              <ItemsControl.ItemTemplate>
+                <DataTemplate x:DataType="local:ChartBarItem">
+                  <Border BorderBrush="#313244" BorderThickness="0,0,0,1" Padding="12,8">
+                    <Grid ColumnDefinitions="36,210,*,100">
+                      <!-- Rank -->
+                      <TextBlock Grid.Column="0" Text="{Binding Rank}"
+                                 FontWeight="Bold" FontSize="12" Foreground="#585b70"
+                                 VerticalAlignment="Center"/>
 
-          <!-- COST / HR -->
-          <Button Grid.Column="4" Classes="colhdr" Tag="CostPerHour"
-                  HorizontalAlignment="Right" Click="OnColumnHeaderClick">
-            <StackPanel Orientation="Horizontal" Spacing="4">
-              <TextBlock Text="COST / HR" FontSize="10" FontWeight="Bold" LetterSpacing="1"/>
-              <TextBlock x:Name="SortCostPerHour" FontSize="10" FontWeight="Bold" Foreground="#cba6f7"/>
-            </StackPanel>
-          </Button>
+                      <!-- Game Title & Subtitle -->
+                      <StackPanel Grid.Column="1" VerticalAlignment="Center" Spacing="2" Margin="0,0,10,0">
+                        <TextBlock Text="{Binding Title}"
+                                   FontWeight="SemiBold" FontSize="13"
+                                   TextTrimming="CharacterEllipsis"/>
+                        <TextBlock Text="{Binding Subtitle}"
+                                   FontSize="11" Foreground="#6c7086"/>
+                      </StackPanel>
 
-          <!-- BACKLOG HRS -->
-          <Button Grid.Column="5" Classes="colhdr" Tag="BacklogHrs"
-                  HorizontalAlignment="Right" Click="OnColumnHeaderClick">
-            <StackPanel Orientation="Horizontal" Spacing="4">
-              <TextBlock Text="BACKLOG HRS" FontSize="10" FontWeight="Bold" LetterSpacing="1"/>
-              <TextBlock x:Name="SortBacklogHrs" FontSize="10" FontWeight="Bold" Foreground="#cba6f7"/>
-            </StackPanel>
-          </Button>
+                      <!-- Horizontal Bar Visual -->
+                      <Border Grid.Column="2"
+                              Background="#11111b"
+                              CornerRadius="4"
+                              Height="22"
+                              VerticalAlignment="Center"
+                              Margin="6,0,12,0"
+                              ClipToBounds="True">
+                        <local:BarVisual Ratio="{Binding BarRatio}" Fill="{Binding BarBrush}"/>
+                      </Border>
 
-        </Grid>
-      </Border>
-
-      <!-- Rows -->
-      <ScrollViewer Grid.Row="1">
-        <ItemsControl x:Name="GameRows" Padding="0,4">
-          <ItemsControl.ItemTemplate>
-            <DataTemplate x:DataType="local:AnalyzerRow">
-              <Border BorderBrush="#313244" BorderThickness="0,0,0,1"
-                      Padding="16,10">
-                <Grid ColumnDefinitions="*,90,80,90,100,90">
-
-                  <!-- Title + Platform -->
-                  <StackPanel Grid.Column="0" Spacing="2">
-                    <TextBlock Text="{Binding Title}"
-                               FontWeight="SemiBold" FontSize="13"/>
-                    <TextBlock Text="{Binding Platform}"
-                               FontSize="11" Foreground="#6c7086"/>
-                  </StackPanel>
-
-                  <!-- Status pill -->
-                  <Border Grid.Column="1"
-                          CornerRadius="10" Padding="8,3"
-                          HorizontalAlignment="Center" VerticalAlignment="Center"
-                          Background="{Binding StatusBackground}">
-                    <TextBlock Text="{Binding Status}"
-                               FontSize="11" FontWeight="Medium"
-                               Foreground="{Binding StatusForeground}"
-                               HorizontalAlignment="Center"/>
+                      <!-- Cost / hr Value Label -->
+                      <TextBlock Grid.Column="3"
+                                 Text="{Binding CostPerHour}"
+                                 Foreground="{Binding BarBrush}"
+                                 FontWeight="Bold"
+                                 FontSize="13"
+                                 VerticalAlignment="Center"
+                                 HorizontalAlignment="Right"/>
+                    </Grid>
                   </Border>
-
-                  <!-- Hours played -->
-                  <TextBlock Grid.Column="2"
-                             Text="{Binding HoursPlayed}"
-                             Foreground="#cdd6f4" FontSize="13"
-                             HorizontalAlignment="Right"
-                             VerticalAlignment="Center"/>
-
-                  <!-- Price -->
-                  <TextBlock Grid.Column="3"
-                             Text="{Binding Price}"
-                             Foreground="#cdd6f4" FontSize="13"
-                             HorizontalAlignment="Right"
-                             VerticalAlignment="Center"/>
-
-                  <!-- Cost per hour (colour-coded) -->
-                  <TextBlock Grid.Column="4"
-                             Text="{Binding CostPerHour}"
-                             Foreground="{Binding CostColour}"
-                             FontSize="13" FontWeight="SemiBold"
-                             HorizontalAlignment="Right"
-                             VerticalAlignment="Center"/>
-
-                  <!-- Backlog hours remaining -->
-                  <TextBlock Grid.Column="5"
-                             Text="{Binding BacklogRemaining}"
-                             Foreground="#cba6f7" FontSize="13"
-                             HorizontalAlignment="Right"
-                             VerticalAlignment="Center"/>
-
-                </Grid>
-              </Border>
-            </DataTemplate>
-          </ItemsControl.ItemTemplate>
-        </ItemsControl>
-      </ScrollViewer>
+                </DataTemplate>
+              </ItemsControl.ItemTemplate>
+            </ItemsControl>
+          </ScrollViewer>
+        </Grid>
+      </Grid>
 
     </Grid>
 
@@ -214,12 +344,21 @@
             Background="#11111b"
             BorderBrush="#313244" BorderThickness="0,1,0,0"
             Padding="20,12">
-      <Grid ColumnDefinitions="*,Auto">
+      <Grid ColumnDefinitions="*,Auto,Auto">
         <TextBlock Grid.Column="0"
+                   x:Name="FooterNote"
                    Text="Games are sorted by cost per hour (cheapest first). — means data unavailable."
                    Foreground="#45475a" FontSize="11"
                    VerticalAlignment="Center"/>
         <Button Grid.Column="1"
+                x:Name="ChartFooterBtn"
+                Content="📊 View Chart"
+                Classes="accent"
+                Padding="14,8"
+                Margin="0,0,8,0"
+                Click="OnToggleChartClick"
+                ToolTip.Tip="Generate and toggle value-per-hour chart view"/>
+        <Button Grid.Column="2"
                 Content="Close"
                 Padding="16,8"
                 Click="OnClose"/>

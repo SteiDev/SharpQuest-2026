@@ -34,6 +34,18 @@ public sealed class AnalyzerRow
     public string   RawStatus        { get; init; } = string.Empty;
 }
 
+/// <summary>One item in the generated value/hour chart.</summary>
+public sealed class ChartBarItem
+{
+    public string Rank             { get; init; } = string.Empty;
+    public string Title            { get; init; } = string.Empty;
+    public string Subtitle         { get; init; } = string.Empty;
+    public string CostPerHour      { get; init; } = string.Empty;
+    public decimal RawCostPerHour  { get; init; }
+    public double BarRatio         { get; init; }
+    public IBrush BarBrush         { get; init; } = Brushes.Gray;
+}
+
 // ── Dialog ────────────────────────────────────────────────────────────────────
 
 public partial class ValueAnalyzerDialog : Window
@@ -44,6 +56,10 @@ public partial class ValueAnalyzerDialog : Window
     // Current sort state
     private string _sortColumn    = "CostPerHour";   // default sort
     private bool   _sortAscending = true;
+
+    // Chart view state
+    private bool _isChartView         = false;
+    private bool _chartSortAscending  = true; // true = lowest €/h (best value) first
 
     // Map column tag → the sort-indicator TextBlock
     private Dictionary<string, TextBlock> _indicators = new();
@@ -159,6 +175,98 @@ public partial class ValueAnalyzerDialog : Window
             : rows.OrderBy(r => selector(r).HasValue ? 0 : 1)
                   .ThenByDescending(r => selector(r).GetValueOrDefault())
                   .ThenBy(r => r.Title);
+
+    // ── Chart Generation and View Toggling ────────────────────────────────────
+
+    private void OnToggleChartClick(object? sender, RoutedEventArgs e)
+    {
+        _isChartView = !_isChartView;
+        UpdateViewVisibility();
+    }
+
+    private void UpdateViewVisibility()
+    {
+        TableView.IsVisible = !_isChartView;
+        ChartView.IsVisible = _isChartView;
+
+        string btnText = _isChartView ? "📋 Table View" : "📊 View Chart";
+        ViewToggleBtn.Content = btnText;
+        ChartFooterBtn.Content = btnText;
+
+        if (_isChartView)
+        {
+            FooterNote.Text = "Bar length is relative to the highest cost per hour (€/h). Lower cost = better value.";
+            GenerateChart();
+        }
+        else
+        {
+            FooterNote.Text = "Games are sorted by cost per hour (cheapest first). — means data unavailable.";
+        }
+    }
+
+    private void OnSortChartBestValueClick(object? sender, RoutedEventArgs e)
+    {
+        _chartSortAscending = true;
+        SortBestValueBtn.Classes.Add("active");
+        SortHighestCostBtn.Classes.Remove("active");
+        GenerateChart();
+    }
+
+    private void OnSortChartHighestCostClick(object? sender, RoutedEventArgs e)
+    {
+        _chartSortAscending = false;
+        SortHighestCostBtn.Classes.Add("active");
+        SortBestValueBtn.Classes.Remove("active");
+        GenerateChart();
+    }
+
+    private void GenerateChart()
+    {
+        var chartable = _allRows
+            .Where(r => r.RawCostPerHour.HasValue)
+            .ToList();
+
+        if (chartable.Count == 0)
+        {
+            ChartEmptyState.IsVisible = true;
+            ChartScrollViewer.IsVisible = false;
+            ChartRows.ItemsSource = null;
+            return;
+        }
+
+        ChartEmptyState.IsVisible = false;
+        ChartScrollViewer.IsVisible = true;
+
+        var ordered = _chartSortAscending
+            ? chartable.OrderBy(r => r.RawCostPerHour!.Value).ThenBy(r => r.Title).ToList()
+            : chartable.OrderByDescending(r => r.RawCostPerHour!.Value).ThenBy(r => r.Title).ToList();
+
+        decimal maxCost = chartable.Max(r => r.RawCostPerHour!.Value);
+        if (maxCost <= 0m) maxCost = 1m;
+
+        var items = new List<ChartBarItem>();
+        for (int i = 0; i < ordered.Count; i++)
+        {
+            var row = ordered[i];
+            decimal val = row.RawCostPerHour!.Value;
+            double ratio = (double)(val / maxCost);
+            // Ensure even very low cost values have a small visible bar (min 3%)
+            double clampedRatio = Math.Max(0.03, Math.Min(1.0, ratio));
+
+            items.Add(new ChartBarItem
+            {
+                Rank = $"#{i + 1}",
+                Title = row.Title,
+                Subtitle = $"{row.Platform} · {row.HoursPlayed} · {row.Price}",
+                CostPerHour = row.CostPerHour,
+                RawCostPerHour = val,
+                BarRatio = clampedRatio,
+                BarBrush = row.CostColour
+            });
+        }
+
+        ChartRows.ItemsSource = items;
+    }
 
     // ── Row builder ───────────────────────────────────────────────────────────
 
