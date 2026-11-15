@@ -96,6 +96,22 @@
             BorderBrush="#313244" BorderThickness="0,0,0,1"
             Padding="16,10"
             IsVisible="False">
+      <Border.Styles>
+        <Style Selector="Border">
+          <Style.Animations>
+            <Animation Duration="0:0:0.18" FillMode="Forward" Easing="CubicEaseOut">
+              <KeyFrame Cue="0%">
+                <Setter Property="Opacity" Value="0.0"/>
+                <Setter Property="TranslateTransform.Y" Value="-8"/>
+              </KeyFrame>
+              <KeyFrame Cue="100%">
+                <Setter Property="Opacity" Value="1.0"/>
+                <Setter Property="TranslateTransform.Y" Value="0"/>
+              </KeyFrame>
+            </Animation>
+          </Style.Animations>
+        </Style>
+      </Border.Styles>
       <StackPanel Spacing="10">
 
         <!-- Status chips -->
@@ -243,6 +259,22 @@
           <!-- Details when selected -->
           <StackPanel IsVisible="{Binding Selected, Converter={x:Static ObjectConverters.IsNotNull}}"
                       Spacing="0">
+            <StackPanel.Styles>
+              <Style Selector="StackPanel">
+                <Style.Animations>
+                  <Animation Duration="0:0:0.2" FillMode="Forward" Easing="CubicEaseOut">
+                    <KeyFrame Cue="0%">
+                      <Setter Property="Opacity" Value="0.0"/>
+                      <Setter Property="TranslateTransform.Y" Value="10"/>
+                    </KeyFrame>
+                    <KeyFrame Cue="100%">
+                      <Setter Property="Opacity" Value="1.0"/>
+                      <Setter Property="TranslateTransform.Y" Value="0"/>
+                    </KeyFrame>
+                  </Animation>
+                </Style.Animations>
+              </Style>
+            </StackPanel.Styles>
 
             <!-- Game title header -->
             <TextBlock Text="{Binding Selected.DisplayName}"

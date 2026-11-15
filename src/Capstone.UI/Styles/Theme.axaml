@@ -36,6 +36,11 @@
     <Setter Property="CornerRadius"     Value="6"/>
     <Setter Property="Padding"          Value="10,7"/>
     <Setter Property="FontSize"         Value="13"/>
+    <Setter Property="Transitions">
+      <Transitions>
+        <BrushTransition Property="BorderBrush" Duration="0:0:0.2"/>
+      </Transitions>
+    </Setter>
   </Style>
   <Style Selector="TextBox:focus">
     <Setter Property="BorderBrush" Value="#cba6f7"/>
@@ -53,6 +58,11 @@
     <Setter Property="CornerRadius"    Value="6"/>
     <Setter Property="Padding"         Value="10,7"/>
     <Setter Property="FontSize"        Value="13"/>
+    <Setter Property="Transitions">
+      <Transitions>
+        <BrushTransition Property="BorderBrush" Duration="0:0:0.2"/>
+      </Transitions>
+    </Setter>
   </Style>
   <Style Selector="ComboBox:focus">
     <Setter Property="BorderBrush" Value="#cba6f7"/>
@@ -79,9 +89,18 @@
     <Setter Property="FontSize"        Value="13"/>
     <Setter Property="FontWeight"      Value="Medium"/>
     <Setter Property="Cursor"          Value="Hand"/>
+    <Setter Property="RenderTransform" Value="none"/>
+    <Setter Property="Transitions">
+      <Transitions>
+        <TransformOperationsTransition Property="RenderTransform" Duration="0:0:0.08" Easing="CubicEaseOut"/>
+      </Transitions>
+    </Setter>
   </Style>
   <Style Selector="Button:pointerover /template/ ContentPresenter">
     <Setter Property="Background" Value="#585b70"/>
+  </Style>
+  <Style Selector="Button:pressed">
+    <Setter Property="RenderTransform" Value="scale(0.96)"/>
   </Style>
   <Style Selector="Button:pressed /template/ ContentPresenter">
     <Setter Property="Background" Value="#313244"/>
@@ -138,9 +157,18 @@
     <Setter Property="Padding"         Value="10,4"/>
     <Setter Property="FontSize"        Value="12"/>
     <Setter Property="FontWeight"      Value="Medium"/>
+    <Setter Property="RenderTransform" Value="none"/>
+    <Setter Property="Transitions">
+      <Transitions>
+        <TransformOperationsTransition Property="RenderTransform" Duration="0:0:0.08" Easing="CubicEaseOut"/>
+      </Transitions>
+    </Setter>
   </Style>
   <Style Selector="Button.chip:pointerover /template/ ContentPresenter">
     <Setter Property="Background" Value="#45475a"/>
+  </Style>
+  <Style Selector="Button.chip:pressed">
+    <Setter Property="RenderTransform" Value="scale(0.93)"/>
   </Style>
 
   <!-- ── Filter Chip active (.chip.active class) ──────────────────────── -->
@@ -163,11 +191,20 @@
     <Setter Property="ScrollViewer.HorizontalScrollBarVisibility" Value="Disabled"/>
   </Style>
   <Style Selector="ListBoxItem">
-    <Setter Property="Padding"       Value="10,8"/>
-    <Setter Property="CornerRadius"  Value="6"/>
-    <Setter Property="Margin"        Value="2,1"/>
-    <Setter Property="Background"    Value="Transparent"/>
-    <Setter Property="Foreground"    Value="#cdd6f4"/>
+    <Setter Property="Padding"         Value="10,8"/>
+    <Setter Property="CornerRadius"    Value="6"/>
+    <Setter Property="Margin"          Value="2,1"/>
+    <Setter Property="Background"      Value="Transparent"/>
+    <Setter Property="Foreground"      Value="#cdd6f4"/>
+    <Setter Property="RenderTransform" Value="none"/>
+    <Setter Property="Transitions">
+      <Transitions>
+        <TransformOperationsTransition Property="RenderTransform" Duration="0:0:0.12" Easing="CubicEaseOut"/>
+      </Transitions>
+    </Setter>
+  </Style>
+  <Style Selector="ListBoxItem:pointerover">
+    <Setter Property="RenderTransform" Value="translateX(4px)"/>
   </Style>
   <Style Selector="ListBoxItem:pointerover /template/ ContentPresenter">
     <Setter Property="Background" Value="#313244"/>
@@ -181,7 +218,15 @@
 
   <!-- ── ScrollBar ─────────────────────────────────────────────────────── -->
   <Style Selector="ScrollBar">
-    <Setter Property="Opacity" Value="0.6"/>
+    <Setter Property="Opacity" Value="0.5"/>
+    <Setter Property="Transitions">
+      <Transitions>
+        <DoubleTransition Property="Opacity" Duration="0:0:0.2"/>
+      </Transitions>
+    </Setter>
+  </Style>
+  <Style Selector="ScrollBar:pointerover">
+    <Setter Property="Opacity" Value="1.0"/>
   </Style>
 
   <!-- ── Separator ─────────────────────────────────────────────────────── -->

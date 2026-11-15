@@ -45,6 +45,22 @@
 
       <!-- ── View 1: Settings Menu ──────────────────────────────────────── -->
       <ScrollViewer x:Name="MenuView" IsVisible="True" Padding="20,16">
+        <ScrollViewer.Styles>
+          <Style Selector="ScrollViewer">
+            <Style.Animations>
+              <Animation Duration="0:0:0.18" FillMode="Forward" Easing="CubicEaseOut">
+                <KeyFrame Cue="0%">
+                  <Setter Property="Opacity" Value="0.0"/>
+                  <Setter Property="TranslateTransform.X" Value="-12"/>
+                </KeyFrame>
+                <KeyFrame Cue="100%">
+                  <Setter Property="Opacity" Value="1.0"/>
+                  <Setter Property="TranslateTransform.X" Value="0"/>
+                </KeyFrame>
+              </Animation>
+            </Style.Animations>
+          </Style>
+        </ScrollViewer.Styles>
         <StackPanel Spacing="12">
 
           <TextBlock Text="CONFIGURATION" FontSize="10" FontWeight="Bold"
@@ -126,6 +142,22 @@
 
       <!-- ── View 2: .env File Editor ───────────────────────────────────── -->
       <Grid x:Name="EnvEditorView" IsVisible="False" RowDefinitions="Auto,*,Auto" Margin="20,16">
+        <Grid.Styles>
+          <Style Selector="Grid">
+            <Style.Animations>
+              <Animation Duration="0:0:0.18" FillMode="Forward" Easing="CubicEaseOut">
+                <KeyFrame Cue="0%">
+                  <Setter Property="Opacity" Value="0.0"/>
+                  <Setter Property="TranslateTransform.X" Value="12"/>
+                </KeyFrame>
+                <KeyFrame Cue="100%">
+                  <Setter Property="Opacity" Value="1.0"/>
+                  <Setter Property="TranslateTransform.X" Value="0"/>
+                </KeyFrame>
+              </Animation>
+            </Style.Animations>
+          </Style>
+        </Grid.Styles>
 
         <!-- Editor Toolbar -->
         <Grid Grid.Row="0" ColumnDefinitions="Auto,*,Auto" Margin="0,0,0,10">

@@ -92,6 +92,22 @@
 
       <!-- Table View -->
       <Grid x:Name="TableView" RowDefinitions="Auto,*" IsVisible="True">
+        <Grid.Styles>
+          <Style Selector="Grid">
+            <Style.Animations>
+              <Animation Duration="0:0:0.18" FillMode="Forward" Easing="CubicEaseOut">
+                <KeyFrame Cue="0%">
+                  <Setter Property="Opacity" Value="0.0"/>
+                  <Setter Property="TranslateTransform.Y" Value="-8"/>
+                </KeyFrame>
+                <KeyFrame Cue="100%">
+                  <Setter Property="Opacity" Value="1.0"/>
+                  <Setter Property="TranslateTransform.Y" Value="0"/>
+                </KeyFrame>
+              </Animation>
+            </Style.Animations>
+          </Style>
+        </Grid.Styles>
 
         <!-- Column headers -->
         <Border Grid.Row="0"
@@ -225,6 +241,22 @@
 
       <!-- Chart View -->
       <Grid x:Name="ChartView" RowDefinitions="Auto,*" IsVisible="False">
+        <Grid.Styles>
+          <Style Selector="Grid">
+            <Style.Animations>
+              <Animation Duration="0:0:0.18" FillMode="Forward" Easing="CubicEaseOut">
+                <KeyFrame Cue="0%">
+                  <Setter Property="Opacity" Value="0.0"/>
+                  <Setter Property="TranslateTransform.Y" Value="8"/>
+                </KeyFrame>
+                <KeyFrame Cue="100%">
+                  <Setter Property="Opacity" Value="1.0"/>
+                  <Setter Property="TranslateTransform.Y" Value="0"/>
+                </KeyFrame>
+              </Animation>
+            </Style.Animations>
+          </Style>
+        </Grid.Styles>
         <!-- Chart Controls & Legend Header -->
         <Border Grid.Row="0"
                 Background="#11111b"
