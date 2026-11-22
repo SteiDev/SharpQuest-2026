@@ -8,7 +8,7 @@ namespace Capstone.UI.Views;
 
 public partial class IgdbSearchDialog : Window
 {
-    public IgdbSearchDialog()
+    public IgdbSearchDialog(string? prefillTitle = null)
     {
         InitializeComponent();
 
@@ -17,6 +17,9 @@ public partial class IgdbSearchDialog : Window
 
         StatusBox.ItemsSource = Enum.GetValues<GameStatus>();
         StatusBox.SelectedItem = GameStatus.Backlog;
+
+        if (!string.IsNullOrWhiteSpace(prefillTitle))
+            SearchBox.Text = prefillTitle;
     }
 
     // ── Search ────────────────────────────────────────────────────────────────

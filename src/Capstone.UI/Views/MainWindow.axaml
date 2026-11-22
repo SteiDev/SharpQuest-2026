@@ -375,7 +375,8 @@
         <ControlTheme TargetType="ListBoxItem" BasedOn="{StaticResource {x:Type ListBoxItem}}">
           <Setter Property="ContextMenu">
             <ContextMenu>
-              <MenuItem Header="✎  Edit game…" Click="OnEditClick"/>
+              <MenuItem Header="✎  Edit game…"           Click="OnEditClick"/>
+              <MenuItem Header="🔍 Search IGDB to enrich…" Click="OnIgdbEnrichClick"/>
             </ContextMenu>
           </Setter>
         </ControlTheme>

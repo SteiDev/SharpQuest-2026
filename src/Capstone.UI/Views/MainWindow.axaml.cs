@@ -543,6 +543,46 @@ public partial class MainWindow : Window
         await OpenEditDialogAsync(game);
     }
 
+    private async void OnIgdbEnrichClick(object? sender, RoutedEventArgs e)
+    {
+        if (sender is not MenuItem mi) return;
+        var item = (mi.Parent as ContextMenu)?.DataContext
+                   ?? (mi.DataContext);
+
+        if (item is not BaseTrackableGame game) return;
+
+        if (Vm is not null)
+            Vm.Selected = game;
+
+        await OpenIgdbEnrichDialogAsync(game);
+    }
+
+    private async Task OpenIgdbEnrichDialogAsync(BaseTrackableGame game)
+    {
+        // Open the IGDB search dialog pre-filled with the game's current title.
+        var dialog = new IgdbSearchDialog(prefillTitle: game.Title);
+        var result = await dialog.ShowDialog<DigitalGame?>(this);
+        if (result is null) return;
+
+        // Apply IGDB metadata to the existing game, keeping status/platform/hours
+        // from the user's library so we only fill in the missing info.
+        Vm?.UpdateGame(game,
+            title:                result.Title,
+            platform:             game.Platform,
+            status:               game.Status,
+            genre:                result.Genre   ?? game.Genre,
+            developer:            result.Developer?.Name ?? game.Developer?.Name ?? string.Empty,
+            hoursPlayed:          game.HoursPlayed,
+            price:                game.Price,
+            releaseYear:          result.ReleaseYear ?? game.ReleaseYear,
+            rating:               game.Rating,
+            publisher:            game.Publisher,
+            averageCompleteHours: game.AverageCompleteHours,
+            description:          result.Description ?? game.Description);
+
+        SetStatus($"Enriched \"{result.Title}\" with IGDB data.");
+    }
+
     private async Task OpenEditDialogAsync(BaseTrackableGame game)
     {
         var dialog = new EditGameDialog(game);
