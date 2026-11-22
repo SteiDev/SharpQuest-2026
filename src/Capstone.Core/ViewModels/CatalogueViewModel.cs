@@ -398,6 +398,23 @@ public sealed class CatalogueViewModel : ICatalogueViewModel
         _repo?.Delete(id);
     }
 
+    /// <summary>
+    /// Removes every game from the store, the observable list, and the SQLite database.
+    /// Used by the import-overwrite flow.
+    /// </summary>
+    public void ClearAll()
+    {
+        Selected = null;
+        var ids = _store.All().Select(i => i.Id).ToList();
+        foreach (var id in ids)
+        {
+            _store.Remove(id);
+            _repo?.Delete(id);
+        }
+        _items.Clear();
+        Notify(nameof(Count));
+    }
+
     // ── Event handler: store item added ───────────────────────────────────────
 
     private void OnItemAdded(IItem item)

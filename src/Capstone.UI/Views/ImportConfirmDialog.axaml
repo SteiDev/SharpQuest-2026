@@ -1,0 +1,67 @@
+<Window xmlns="https://github.com/avaloniaui"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        x:Class="Capstone.UI.Views.ImportConfirmDialog"
+        Title="Overwrite Library?"
+        Width="420" Height="230"
+        MinWidth="360" MinHeight="200"
+        WindowStartupLocation="CenterOwner"
+        CanResize="False"
+        Background="#1e1e2e"
+        KeyDown="OnKeyDown">
+
+  <Grid RowDefinitions="Auto,*,Auto">
+
+    <!-- Header -->
+    <Border Grid.Row="0"
+            Background="#11111b"
+            BorderBrush="#313244" BorderThickness="0,0,0,1"
+            Padding="20,14">
+      <StackPanel Orientation="Horizontal" Spacing="10" VerticalAlignment="Center">
+        <Border Background="#f38ba8" CornerRadius="6"
+                Width="30" Height="30" VerticalAlignment="Center">
+          <TextBlock Text="!" FontSize="17" FontWeight="Bold"
+                     Foreground="#1e1e2e"
+                     HorizontalAlignment="Center"
+                     VerticalAlignment="Center"/>
+        </Border>
+        <StackPanel Spacing="2">
+          <TextBlock Text="Overwrite Library?" FontSize="15" FontWeight="Bold" Foreground="#cdd6f4"/>
+          <TextBlock Text="This action cannot be undone"
+                     FontSize="11" Foreground="#585b70"/>
+        </StackPanel>
+      </StackPanel>
+    </Border>
+
+    <!-- Body -->
+    <StackPanel Grid.Row="1" Spacing="10" Margin="22,20">
+      <TextBlock x:Name="BodyText"
+                 Foreground="#cdd6f4"
+                 FontSize="13"
+                 TextWrapping="Wrap"/>
+      <Border Background="#313244" CornerRadius="6" Padding="12,8">
+        <TextBlock Text="All existing games will be permanently removed and replaced with the games from the import file."
+                   Foreground="#f38ba8"
+                   FontSize="11"
+                   TextWrapping="Wrap"/>
+      </Border>
+    </StackPanel>
+
+    <!-- Footer buttons -->
+    <Border Grid.Row="2"
+            Background="#11111b"
+            BorderBrush="#313244" BorderThickness="0,1,0,0"
+            Padding="20,12">
+      <StackPanel Orientation="Horizontal" HorizontalAlignment="Right" Spacing="8">
+        <Button Content="Cancel"
+                Padding="14,8"
+                Click="OnCancelClick"/>
+        <Button Content="Replace Library"
+                Classes="danger"
+                Padding="14,8"
+                Click="OnConfirmClick"/>
+      </StackPanel>
+    </Border>
+
+  </Grid>
+</Window>
+

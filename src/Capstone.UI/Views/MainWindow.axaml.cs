@@ -4,9 +4,11 @@ using Avalonia.Data.Converters;
 using Avalonia.Input;
 using Avalonia.Interactivity;
 using Avalonia.Media;
+using Avalonia.Platform.Storage;
 using Capstone.Core.Models;
 using Capstone.Core.Models.Enums;
 using Capstone.Core.Models.Interfaces;
+using Capstone.Core.Services;
 using Capstone.Core.ViewModels;
 using Capstone.Core.Web;
 using Capstone.UI.DevConsole;
@@ -316,6 +318,109 @@ public partial class MainWindow : Window
         {
             _isSettingsOpen = false;
         }
+    }
+
+    // ── Export / Import ───────────────────────────────────────────────────────
+
+    private async void OnExportClick(object? sender, RoutedEventArgs e)
+    {
+        if (Vm is null) return;
+
+        var file = await TopLevel.GetTopLevel(this)!.StorageProvider.SaveFilePickerAsync(
+            new FilePickerSaveOptions
+            {
+                Title             = "Export Library",
+                SuggestedFileName = "sharpquest-library.json",
+                FileTypeChoices   =
+                [
+                    new FilePickerFileType("JSON file") { Patterns = ["*.json"] }
+                ]
+            });
+
+        if (file is null) return;
+
+        try
+        {
+            var path = file.Path.LocalPath;
+            await LibraryExporter.ExportAsync(Vm.Items, path);
+
+            var count = Vm.Items.Count();
+            SetStatus($"Exported {count} game{(count == 1 ? "" : "s")} to {System.IO.Path.GetFileName(path)}");
+        }
+        catch (Exception ex)
+        {
+            SetStatus($"Export failed: {ex.Message}");
+        }
+    }
+
+    private async void OnImportClick(object? sender, RoutedEventArgs e)
+    {
+        var files = await TopLevel.GetTopLevel(this)!.StorageProvider.OpenFilePickerAsync(
+            new FilePickerOpenOptions
+            {
+                Title          = "Import Library",
+                AllowMultiple  = false,
+                FileTypeFilter =
+                [
+                    new FilePickerFileType("JSON file") { Patterns = ["*.json"] }
+                ]
+            });
+
+        if (files.Count == 0) return;
+
+        try
+        {
+            var path     = files[0].Path.LocalPath;
+            var imported = await LibraryExporter.ImportAsync(path);
+
+            if (imported.Count == 0)
+            {
+                SetStatus("Import file contains no games.");
+                return;
+            }
+
+            // Warn if the library already has games — importing will replace everything.
+            if (Vm is not null && Vm.Items.Any())
+            {
+                var currentCount = Vm.Items.Count();
+                var confirm = new ImportConfirmDialog(currentCount, imported.Count);
+                var proceed = await confirm.ShowDialog<bool>(this);
+                if (!proceed) return;
+
+                Vm.ClearAll();
+            }
+
+            foreach (var game in imported)
+                Vm?.AddCommand.Execute(game);
+
+            RefreshGenreDropdown();
+            SetStatus($"Imported {imported.Count} game{(imported.Count == 1 ? "" : "s")} from {System.IO.Path.GetFileName(path)}");
+        }
+        catch (Exception ex)
+        {
+            SetStatus($"Import failed: {ex.Message}");
+        }
+    }
+
+    // ── Status bar helper ─────────────────────────────────────────────────────
+
+    private System.Threading.CancellationTokenSource? _statusCts;
+
+    private async void SetStatus(string message)
+    {
+        _statusCts?.Cancel();
+        _statusCts = new System.Threading.CancellationTokenSource();
+        var token = _statusCts.Token;
+
+        StatusLabel.Text = message;
+
+        try
+        {
+            await Task.Delay(4000, token);
+            if (!token.IsCancellationRequested)
+                StatusLabel.Text = string.Empty;
+        }
+        catch (TaskCanceledException) { /* replaced by a newer message */ }
     }
 
     // ── Value Analyzer ────────────────────────────────────────────────────────
