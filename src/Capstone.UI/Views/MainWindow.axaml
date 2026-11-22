@@ -338,7 +338,8 @@
     <ListBox Grid.Row="2" Grid.Column="0"
              ItemsSource="{Binding Items}"
              SelectedItem="{Binding Selected}"
-             Margin="12,12,6,12">
+             Margin="12,12,6,12"
+             DoubleTapped="OnGameListDoubleTapped">
       <ListBox.ItemTemplate>
         <DataTemplate>
           <Grid ColumnDefinitions="Auto,*,Auto" Margin="0,2">

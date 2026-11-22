@@ -466,6 +466,12 @@ public partial class MainWindow : Window
 
     // ── Edit game (right-click context menu) ──────────────────────────────────
 
+    private async void OnGameListDoubleTapped(object? sender, Avalonia.Input.TappedEventArgs e)
+    {
+        if (Vm?.Selected is not BaseTrackableGame game) return;
+        await OpenEditDialogAsync(game);
+    }
+
     private async void OnEditClick(object? sender, RoutedEventArgs e)
     {
         if (sender is not MenuItem mi) return;
@@ -477,6 +483,11 @@ public partial class MainWindow : Window
         if (Vm is not null)
             Vm.Selected = game;
 
+        await OpenEditDialogAsync(game);
+    }
+
+    private async Task OpenEditDialogAsync(BaseTrackableGame game)
+    {
         var dialog = new EditGameDialog(game);
         var result = await dialog.ShowDialog<EditResult?>(this);
         if (result is null) return;
