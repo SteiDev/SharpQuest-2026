@@ -26,7 +26,7 @@
         </Border>
         <StackPanel Spacing="2">
           <TextBlock Text="Import from Steam" FontSize="15" FontWeight="Bold" Foreground="#cdd6f4"/>
-          <TextBlock Text="Fetch your Steam library using your API key and Steam64 ID" FontSize="11" Foreground="#585b70"/>
+          <TextBlock Text="Credentials pre-filled from .env (STEAM_API_KEY / STEAM_ID) if set" FontSize="11" Foreground="#585b70"/>
         </StackPanel>
       </StackPanel>
     </Border>

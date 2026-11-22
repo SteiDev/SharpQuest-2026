@@ -16,6 +16,21 @@ public partial class SteamImportDialog : Window
     public SteamImportDialog()
     {
         InitializeComponent();
+        PreFillFromEnv();
+    }
+
+    // ── Pre-fill credentials from environment / .env ──────────────────────────
+
+    private void PreFillFromEnv()
+    {
+        var key     = Environment.GetEnvironmentVariable("STEAM_API_KEY");
+        var steamId = Environment.GetEnvironmentVariable("STEAM_ID");
+
+        if (!string.IsNullOrWhiteSpace(key))
+            ApiKeyBox.Text = key;
+
+        if (!string.IsNullOrWhiteSpace(steamId))
+            SteamIdBox.Text = steamId;
     }
 
     // ── Toggle API key visibility ─────────────────────────────────────────────
