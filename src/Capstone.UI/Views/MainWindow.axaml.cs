@@ -322,7 +322,26 @@ public partial class MainWindow : Window
 
     // ── Export / Import ───────────────────────────────────────────────────────
 
-    private async void OnExportClick(object? sender, RoutedEventArgs e)
+    private void OnImportExportClick(object? sender, RoutedEventArgs e)
+    {
+        if (sender is not Button btn) return;
+
+        var menu = new ContextMenu
+        {
+            Items =
+            {
+                new MenuItem { Header = "⬆ Export…" },
+                new MenuItem { Header = "⬇ Import…" }
+            }
+        };
+
+        ((MenuItem)menu.Items[0]!).Click += async (_, _) => await DoExportAsync();
+        ((MenuItem)menu.Items[1]!).Click += async (_, _) => await DoImportAsync();
+
+        menu.Open(btn);
+    }
+
+    private async Task DoExportAsync()
     {
         if (Vm is null) return;
 
@@ -353,7 +372,7 @@ public partial class MainWindow : Window
         }
     }
 
-    private async void OnImportClick(object? sender, RoutedEventArgs e)
+    private async Task DoImportAsync()
     {
         var files = await TopLevel.GetTopLevel(this)!.StorageProvider.OpenFilePickerAsync(
             new FilePickerOpenOptions
