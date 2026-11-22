@@ -8,7 +8,9 @@ namespace Capstone.UI.Views;
 
 public partial class IgdbSearchDialog : Window
 {
-    public IgdbSearchDialog(string? prefillTitle = null)
+    public IgdbSearchDialog() : this(null) { }
+
+    public IgdbSearchDialog(string? prefillTitle)
     {
         InitializeComponent();
 
