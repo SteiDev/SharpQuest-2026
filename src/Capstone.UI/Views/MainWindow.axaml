@@ -72,13 +72,13 @@
                 Click="OnAddManualClick"
                 ToolTip.Tip="Add a game manually"/>
 
-        <!-- Add from IGDB -->
+        <!-- Web Import (IGDB / Steam) -->
         <Button Grid.Column="6"
-                Content="IGDB"
+                Content="⬇ Web Import"
                 Padding="14,8"
                 Margin="0,0,8,0"
-                Click="OnAddIgdbClick"
-                ToolTip.Tip="Fetch a game from IGDB"/>
+                Click="OnWebImportClick"
+                ToolTip.Tip="Import a game from IGDB or your Steam library"/>
 
         <!-- Remove -->
         <Button Grid.Column="7"
@@ -101,6 +101,7 @@
         <Button Grid.Column="9"
                 Content="⚙ Settings"
                 Padding="12,8"
+                Margin="0,0,8,0"
                 Click="OnSettingsClick"
                 ToolTip.Tip="Open Settings menu (Esc)"/>
       </Grid>

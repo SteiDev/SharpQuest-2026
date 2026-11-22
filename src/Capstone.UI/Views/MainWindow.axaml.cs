@@ -326,18 +326,13 @@ public partial class MainWindow : Window
     {
         if (sender is not Button btn) return;
 
-        var exportItem      = new MenuItem { Header = "⬆ Export…" };
-        var importJsonItem  = new MenuItem { Header = "⬇ Import from file…" };
-        var importSteamItem = new MenuItem { Header = "🎮 Import from Steam…" };
+        var exportItem     = new MenuItem { Header = "⬆ Export…" };
+        var importJsonItem = new MenuItem { Header = "⬇ Import from file…" };
 
-        exportItem.Click      += async (_, _) => await DoExportAsync();
-        importJsonItem.Click  += async (_, _) => await DoImportAsync();
-        importSteamItem.Click += async (_, _) => await DoSteamImportAsync();
+        exportItem.Click     += async (_, _) => await DoExportAsync();
+        importJsonItem.Click += async (_, _) => await DoImportAsync();
 
-        var menu = new ContextMenu
-        {
-            Items = { exportItem, new Separator(), importJsonItem, importSteamItem }
-        };
+        var menu = new ContextMenu { Items = { exportItem, new Separator(), importJsonItem } };
 
         menu.Open(btn);
     }
@@ -499,9 +494,23 @@ public partial class MainWindow : Window
         }
     }
 
-    // ── Add from IGDB ─────────────────────────────────────────────────────────
+    // ── Web Import (IGDB / Steam) ─────────────────────────────────────────────
 
-    private async void OnAddIgdbClick(object? sender, RoutedEventArgs e)
+    private void OnWebImportClick(object? sender, RoutedEventArgs e)
+    {
+        if (sender is not Button btn) return;
+
+        var igdbItem  = new MenuItem { Header = "🔍 IGDB Search…" };
+        var steamItem = new MenuItem { Header = "🎮 Steam Library…" };
+
+        igdbItem.Click  += async (_, _) => await DoIgdbAddAsync();
+        steamItem.Click += async (_, _) => await DoSteamImportAsync();
+
+        var menu = new ContextMenu { Items = { igdbItem, steamItem } };
+        menu.Open(btn);
+    }
+
+    private async Task DoIgdbAddAsync()
     {
         var dialog = new IgdbSearchDialog();
         var result = await dialog.ShowDialog<DigitalGame?>(this);
