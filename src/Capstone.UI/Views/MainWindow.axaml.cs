@@ -543,6 +543,21 @@ public partial class MainWindow : Window
         await OpenEditDialogAsync(game);
     }
 
+    private void OnToggleFavoriteClick(object? sender, RoutedEventArgs e)
+    {
+        if (sender is not MenuItem mi) return;
+        var item = (mi.Parent as ContextMenu)?.DataContext ?? mi.DataContext;
+        if (item is not BaseTrackableGame game) return;
+
+        if (Vm is not null)
+            Vm.Selected = game;
+
+        Vm?.ToggleFavorite(game);
+
+        var label = game.IsFavorite ? "added to" : "removed from";
+        SetStatus($"\"{game.Title}\" {label} favourites.");
+    }
+
     private async void OnIgdbEnrichClick(object? sender, RoutedEventArgs e)
     {
         if (sender is not MenuItem mi) return;

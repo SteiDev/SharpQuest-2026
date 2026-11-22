@@ -305,6 +305,16 @@ public sealed class CatalogueViewModel : ICatalogueViewModel
     /// <inheritdoc/>
     public ICommand RemoveCommand { get; }
 
+
+    // ── Favourite support ───────────────────────────────────────────────────────────
+
+    public void ToggleFavorite(BaseTrackableGame game)
+    {
+        game.IsFavorite = !game.IsFavorite;
+        _repo?.Update(game);
+        ApplyFilter();
+    }
+
     // ── Edit support ──────────────────────────────────────────────────────────
 
     /// <summary>
@@ -538,36 +548,49 @@ public sealed class CatalogueViewModel : ICatalogueViewModel
         IEnumerable<IItem> sorted = CurrentSortField switch
         {
             GameSortField.Title => CurrentSortDirection == SortDirection.Ascending
-                ? matched.OrderBy(i => i.DisplayName, StringComparer.OrdinalIgnoreCase)
-                : matched.OrderByDescending(i => i.DisplayName, StringComparer.OrdinalIgnoreCase),
+                ? matched.OrderBy(i => (i as BaseTrackableGame)?.IsFavorite == true ? 0 : 1)
+                         .ThenBy(i => i.DisplayName, StringComparer.OrdinalIgnoreCase)
+                : matched.OrderBy(i => (i as BaseTrackableGame)?.IsFavorite == true ? 0 : 1)
+                         .ThenByDescending(i => i.DisplayName, StringComparer.OrdinalIgnoreCase),
 
             GameSortField.HoursPlayed => CurrentSortDirection == SortDirection.Ascending
-                ? matched.OrderBy(i => (i as BaseTrackableGame)?.HoursPlayed ?? 0)
-                : matched.OrderByDescending(i => (i as BaseTrackableGame)?.HoursPlayed ?? 0),
+                ? matched.OrderBy(i => (i as BaseTrackableGame)?.IsFavorite == true ? 0 : 1)
+                         .ThenBy(i => (i as BaseTrackableGame)?.HoursPlayed ?? 0)
+                : matched.OrderBy(i => (i as BaseTrackableGame)?.IsFavorite == true ? 0 : 1)
+                         .ThenByDescending(i => (i as BaseTrackableGame)?.HoursPlayed ?? 0),
 
             GameSortField.Rating => CurrentSortDirection == SortDirection.Ascending
-                ? matched.OrderBy(i => (i as BaseTrackableGame)?.Rating.HasValue != true)
+                ? matched.OrderBy(i => (i as BaseTrackableGame)?.IsFavorite == true ? 0 : 1)
+                         .ThenBy(i => (i as BaseTrackableGame)?.Rating.HasValue != true)
                          .ThenBy(i => (i as BaseTrackableGame)?.Rating)
-                : matched.OrderBy(i => (i as BaseTrackableGame)?.Rating.HasValue != true)
+                : matched.OrderBy(i => (i as BaseTrackableGame)?.IsFavorite == true ? 0 : 1)
+                         .ThenBy(i => (i as BaseTrackableGame)?.Rating.HasValue != true)
                          .ThenByDescending(i => (i as BaseTrackableGame)?.Rating),
 
             GameSortField.Price => CurrentSortDirection == SortDirection.Ascending
-                ? matched.OrderBy(i => (i as BaseTrackableGame)?.Price ?? 0m)
-                : matched.OrderByDescending(i => (i as BaseTrackableGame)?.Price ?? 0m),
+                ? matched.OrderBy(i => (i as BaseTrackableGame)?.IsFavorite == true ? 0 : 1)
+                         .ThenBy(i => (i as BaseTrackableGame)?.Price ?? 0m)
+                : matched.OrderBy(i => (i as BaseTrackableGame)?.IsFavorite == true ? 0 : 1)
+                         .ThenByDescending(i => (i as BaseTrackableGame)?.Price ?? 0m),
 
             GameSortField.ReleaseYear => CurrentSortDirection == SortDirection.Ascending
-                ? matched.OrderBy(i => (i as BaseTrackableGame)?.ReleaseYear.HasValue != true)
+                ? matched.OrderBy(i => (i as BaseTrackableGame)?.IsFavorite == true ? 0 : 1)
+                         .ThenBy(i => (i as BaseTrackableGame)?.ReleaseYear.HasValue != true)
                          .ThenBy(i => (i as BaseTrackableGame)?.ReleaseYear)
-                : matched.OrderBy(i => (i as BaseTrackableGame)?.ReleaseYear.HasValue != true)
+                : matched.OrderBy(i => (i as BaseTrackableGame)?.IsFavorite == true ? 0 : 1)
+                         .ThenBy(i => (i as BaseTrackableGame)?.ReleaseYear.HasValue != true)
                          .ThenByDescending(i => (i as BaseTrackableGame)?.ReleaseYear),
 
             GameSortField.AverageCompleteHours => CurrentSortDirection == SortDirection.Ascending
-                ? matched.OrderBy(i => (i as BaseTrackableGame)?.AverageCompleteHours.HasValue != true)
+                ? matched.OrderBy(i => (i as BaseTrackableGame)?.IsFavorite == true ? 0 : 1)
+                         .ThenBy(i => (i as BaseTrackableGame)?.AverageCompleteHours.HasValue != true)
                          .ThenBy(i => (i as BaseTrackableGame)?.AverageCompleteHours)
-                : matched.OrderBy(i => (i as BaseTrackableGame)?.AverageCompleteHours.HasValue != true)
+                : matched.OrderBy(i => (i as BaseTrackableGame)?.IsFavorite == true ? 0 : 1)
+                         .ThenBy(i => (i as BaseTrackableGame)?.AverageCompleteHours.HasValue != true)
                          .ThenByDescending(i => (i as BaseTrackableGame)?.AverageCompleteHours),
 
-            _ => matched
+            // Default order: favourites first, then original insertion order.
+            _ => matched.OrderBy(i => (i as BaseTrackableGame)?.IsFavorite == true ? 0 : 1)
         };
 
         var targetList = sorted.ToList();

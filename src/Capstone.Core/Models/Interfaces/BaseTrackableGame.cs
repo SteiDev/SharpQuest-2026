@@ -39,6 +39,9 @@ public abstract class BaseTrackableGame : IItem
     /// <summary>Publisher (e.g. "Sony Interactive Entertainment", "Devolver Digital").</summary>
     public string? Publisher { get; set; }
 
+    /// <summary>Marks the game as a favourite so it floats to the top of every list.</summary>
+    public bool IsFavorite { get; set; }
+
     /// <summary>Returns a human-readable description of this game entry.</summary>
     public abstract string Describe();
 }

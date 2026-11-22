@@ -39,7 +39,8 @@ public sealed class GameRepository : IDisposable
                 Rating               INTEGER,
                 Publisher            TEXT,
                 AverageCompleteHours REAL,
-                Description          TEXT
+                Description          TEXT,
+                IsFavorite           INTEGER NOT NULL DEFAULT 0
             );
             """;
         cmd.ExecuteNonQuery();
@@ -47,6 +48,7 @@ public sealed class GameRepository : IDisposable
         TryAddColumn("Publisher", "TEXT");
         TryAddColumn("AverageCompleteHours", "REAL");
         TryAddColumn("Description", "TEXT");
+        TryAddColumn("IsFavorite", "INTEGER NOT NULL DEFAULT 0");
     }
 
     private void TryAddColumn(string col, string type)
@@ -71,7 +73,7 @@ public sealed class GameRepository : IDisposable
         var list = new List<BaseTrackableGame>();
 
         using var cmd = _conn.CreateCommand();
-        cmd.CommandText = "SELECT Id,Title,Kind,Platform,Status,Genre,DeveloperName,HoursPlayed,Price,ReleaseYear,Rating,Publisher,AverageCompleteHours,Description FROM Games ORDER BY rowid;";
+        cmd.CommandText = "SELECT Id,Title,Kind,Platform,Status,Genre,DeveloperName,HoursPlayed,Price,ReleaseYear,Rating,Publisher,AverageCompleteHours,Description,IsFavorite FROM Games ORDER BY rowid;";
 
         using var reader = cmd.ExecuteReader();
         while (reader.Read())
@@ -97,6 +99,7 @@ public sealed class GameRepository : IDisposable
             SetProp(game, nameof(game.Publisher),             reader.IsDBNull(11) ? null : reader.GetString(11));
             SetProp(game, nameof(game.AverageCompleteHours), reader.IsDBNull(12) ? (double?)null : reader.GetDouble(12));
             SetProp(game, nameof(game.Description),          reader.IsDBNull(13) ? null : reader.GetString(13));
+            SetProp(game, nameof(game.IsFavorite),            !reader.IsDBNull(14) && reader.GetInt32(14) != 0);
 
             list.Add(game);
         }
@@ -111,8 +114,8 @@ public sealed class GameRepository : IDisposable
     {
         using var cmd = _conn.CreateCommand();
         cmd.CommandText = """
-            INSERT INTO Games (Id,Title,Kind,Platform,Status,Genre,DeveloperName,HoursPlayed,Price,ReleaseYear,Rating,Publisher,AverageCompleteHours,Description)
-            VALUES ($id,$title,$kind,$platform,$status,$genre,$dev,$hours,$price,$year,$rating,$publisher,$completionHours,$description);
+            INSERT INTO Games (Id,Title,Kind,Platform,Status,Genre,DeveloperName,HoursPlayed,Price,ReleaseYear,Rating,Publisher,AverageCompleteHours,Description,IsFavorite)
+            VALUES ($id,$title,$kind,$platform,$status,$genre,$dev,$hours,$price,$year,$rating,$publisher,$completionHours,$description,$isFavorite);
             """;
         BindParams(cmd, game);
         cmd.ExecuteNonQuery();
@@ -127,7 +130,8 @@ public sealed class GameRepository : IDisposable
                 Title=$title, Kind=$kind, Platform=$platform, Status=$status,
                 Genre=$genre, DeveloperName=$dev, HoursPlayed=$hours,
                 Price=$price, ReleaseYear=$year, Rating=$rating,
-                Publisher=$publisher, AverageCompleteHours=$completionHours, Description=$description
+                Publisher=$publisher, AverageCompleteHours=$completionHours, Description=$description,
+                IsFavorite=$isFavorite
             WHERE Id=$id;
             """;
         BindParams(cmd, game);
@@ -161,6 +165,7 @@ public sealed class GameRepository : IDisposable
         cmd.Parameters.AddWithValue("$publisher",       (object?)game.Publisher ?? DBNull.Value);
         cmd.Parameters.AddWithValue("$completionHours", (object?)game.AverageCompleteHours ?? DBNull.Value);
         cmd.Parameters.AddWithValue("$description",     (object?)game.Description ?? DBNull.Value);
+        cmd.Parameters.AddWithValue("$isFavorite",      game.IsFavorite ? 1 : 0);
     }
 
     private static T ParseEnum<T>(string s) where T : struct, Enum =>

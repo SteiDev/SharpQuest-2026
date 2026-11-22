@@ -335,7 +335,7 @@
              DoubleTapped="OnGameListDoubleTapped">
       <ListBox.ItemTemplate>
         <DataTemplate>
-          <Grid ColumnDefinitions="Auto,*,Auto" Margin="0,2">
+          <Grid ColumnDefinitions="Auto,Auto,*,Auto" Margin="0,2">
 
             <!-- Status dot -->
             <Border Grid.Column="0"
@@ -345,8 +345,16 @@
                     VerticalAlignment="Center"
                     Background="{Binding Status, Converter={x:Static local:StatusDotConverter.Instance}}"/>
 
+            <!-- Favourite star (only visible when IsFavorite = true) -->
+            <TextBlock Grid.Column="1"
+                       Text="⭐"
+                       FontSize="11"
+                       VerticalAlignment="Center"
+                       Margin="0,0,6,0"
+                       IsVisible="{Binding IsFavorite}"/>
+
             <!-- Title -->
-            <StackPanel Grid.Column="1" VerticalAlignment="Center" Spacing="2">
+            <StackPanel Grid.Column="2" VerticalAlignment="Center" Spacing="2">
               <TextBlock Text="{Binding DisplayName}"
                          FontWeight="SemiBold"
                          FontSize="13"/>
@@ -356,7 +364,7 @@
             </StackPanel>
 
             <!-- Platform pill -->
-            <Border Grid.Column="2"
+            <Border Grid.Column="3"
                     Background="#1e1e2e"
                     BorderBrush="#45475a" BorderThickness="1"
                     CornerRadius="4"
@@ -377,6 +385,8 @@
             <ContextMenu>
               <MenuItem Header="✎  Edit game…"           Click="OnEditClick"/>
               <MenuItem Header="🔍 Search IGDB to enrich…" Click="OnIgdbEnrichClick"/>
+              <Separator/>
+              <MenuItem Header="⭐ Toggle Favourite"      Click="OnToggleFavoriteClick"/>
             </ContextMenu>
           </Setter>
         </ControlTheme>
