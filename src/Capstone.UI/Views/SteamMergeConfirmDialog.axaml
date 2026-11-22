@@ -1,0 +1,69 @@
+<Window xmlns="https://github.com/avaloniaui"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        x:Class="Capstone.UI.Views.SteamMergeConfirmDialog"
+        Title="Steam Import"
+        Width="440" Height="260"
+        MinWidth="380" MinHeight="240"
+        WindowStartupLocation="CenterOwner"
+        CanResize="False"
+        Background="#1e1e2e"
+        KeyDown="OnKeyDown">
+
+  <Grid RowDefinitions="Auto,*,Auto">
+
+    <!-- Header -->
+    <Border Grid.Row="0"
+            Background="#11111b"
+            BorderBrush="#313244" BorderThickness="0,0,0,1"
+            Padding="20,14">
+      <StackPanel Orientation="Horizontal" Spacing="10" VerticalAlignment="Center">
+        <Border Background="#1b2838" CornerRadius="6"
+                Width="30" Height="30" VerticalAlignment="Center">
+          <TextBlock Text="S" FontSize="14" FontWeight="Bold"
+                     Foreground="#c7d5e0"
+                     HorizontalAlignment="Center"
+                     VerticalAlignment="Center"/>
+        </Border>
+        <StackPanel Spacing="2">
+          <TextBlock Text="Steam Import" FontSize="15" FontWeight="Bold" Foreground="#cdd6f4"/>
+          <TextBlock Text="Your library already has games" FontSize="11" Foreground="#585b70"/>
+        </StackPanel>
+      </StackPanel>
+    </Border>
+
+    <!-- Body -->
+    <StackPanel Grid.Row="1" Spacing="12" Margin="22,18">
+      <TextBlock x:Name="BodyText"
+                 Foreground="#cdd6f4"
+                 FontSize="13"
+                 TextWrapping="Wrap"/>
+      <TextBlock Text="Choose how to handle the existing games:"
+                 Foreground="#a6adc8"
+                 FontSize="12"/>
+    </StackPanel>
+
+    <!-- Footer -->
+    <Border Grid.Row="2"
+            Background="#11111b"
+            BorderBrush="#313244" BorderThickness="0,1,0,0"
+            Padding="20,12">
+      <StackPanel Orientation="Horizontal" HorizontalAlignment="Right" Spacing="8">
+        <Button Content="Cancel"
+                Padding="12,8"
+                Click="OnCancel"/>
+        <Button Content="Replace Library"
+                Classes="danger"
+                Padding="12,8"
+                Click="OnReplace"
+                ToolTip.Tip="Remove all existing games and replace with the Steam selection"/>
+        <Button Content="Merge (Add)"
+                Classes="accent"
+                Padding="12,8"
+                Click="OnMerge"
+                ToolTip.Tip="Keep existing games and add the Steam selection alongside them"/>
+      </StackPanel>
+    </Border>
+
+  </Grid>
+</Window>
+

@@ -326,17 +326,18 @@ public partial class MainWindow : Window
     {
         if (sender is not Button btn) return;
 
+        var exportItem      = new MenuItem { Header = "⬆ Export…" };
+        var importJsonItem  = new MenuItem { Header = "⬇ Import from file…" };
+        var importSteamItem = new MenuItem { Header = "🎮 Import from Steam…" };
+
+        exportItem.Click      += async (_, _) => await DoExportAsync();
+        importJsonItem.Click  += async (_, _) => await DoImportAsync();
+        importSteamItem.Click += async (_, _) => await DoSteamImportAsync();
+
         var menu = new ContextMenu
         {
-            Items =
-            {
-                new MenuItem { Header = "⬆ Export…" },
-                new MenuItem { Header = "⬇ Import…" }
-            }
+            Items = { exportItem, new Separator(), importJsonItem, importSteamItem }
         };
-
-        ((MenuItem)menu.Items[0]!).Click += async (_, _) => await DoExportAsync();
-        ((MenuItem)menu.Items[1]!).Click += async (_, _) => await DoImportAsync();
 
         menu.Open(btn);
     }
@@ -419,6 +420,34 @@ public partial class MainWindow : Window
         {
             SetStatus($"Import failed: {ex.Message}");
         }
+    }
+
+    private async Task DoSteamImportAsync()
+    {
+        var dialog  = new SteamImportDialog();
+        var results = await dialog.ShowDialog<List<Capstone.Core.Models.DigitalGame>?>(this);
+
+        if (results is null || results.Count == 0) return;
+
+        // If the library already has games, ask the user whether to merge or replace.
+        if (Vm is not null && Vm.Items.Any())
+        {
+            var currentCount = Vm.Items.Count();
+            var confirm      = new SteamMergeConfirmDialog(currentCount, results.Count);
+            var mode         = await confirm.ShowDialog<SteamMergeMode>(this);
+
+            if (mode == SteamMergeMode.Cancel) return;
+
+            if (mode == SteamMergeMode.Replace)
+                Vm.ClearAll();
+            // SteamMergeMode.Merge → just add without clearing
+        }
+
+        foreach (var game in results)
+            Vm?.AddCommand.Execute(game);
+
+        RefreshGenreDropdown();
+        SetStatus($"Imported {results.Count} game{(results.Count == 1 ? "" : "s")} from Steam.");
     }
 
     // ── Status bar helper ─────────────────────────────────────────────────────
